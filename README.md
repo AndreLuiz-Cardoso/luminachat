@@ -4,6 +4,10 @@
 
 **A full-stack AI chat application with user accounts, built with FastAPI and framework-free JavaScript.**
 
+### [Try the live app](https://luminachat-n2v5.onrender.com/)
+
+<sub>Hosted on a free instance, so the first visit may take about a minute to load.</sub>
+
 ![Python](https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.162-009688?logo=fastapi&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-SQLModel-003B57?logo=sqlite&logoColor=white)
@@ -173,7 +177,6 @@ This project is under active development. These are the known gaps and the next 
 - [ ] Conversations stored on the server, which currently stay in the browser of each device
 - [ ] Password recovery
 - [ ] Database migrations with Alembic
-- [ ] Production deployment
 
 ## Author
 
