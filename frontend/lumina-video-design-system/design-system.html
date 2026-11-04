@@ -1,0 +1,1562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumina Design System</title>
+<!-- preview capture: the Overview frame reports once the hero intro (fadeSlideIn, up to 1.6 s) has
+     played and the Unicorn Studio aura has drawn its canvas -->
+<meta name="preview-ready-selector" content="body.ds-overview-ready">
+<meta name="preview-ready-after-ms" content="400">
+<!-- the Overview's own runtimes and stylesheets: Inter + Instrument Serif faces, components.css
+     (particle button, card stack, border-gradient mask), animations.css (beam-fall, fadeSlideIn),
+     utilities.css, the Tailwind CSS runtime with the page's 3D-utility plugin, and Lucide -->
+<link href="assets/overview/assets/css2_2832c0ff631d.css" rel="stylesheet">
+<link href="assets/overview/assets/css2_2b2d87bc82d8.css" rel="stylesheet">
+<link rel="stylesheet" href="assets/overview/assets/css/components.css">
+<link rel="stylesheet" href="assets/overview/assets/css/animations.css">
+<link rel="stylesheet" href="assets/overview/assets/css/utilities.css">
+<script src="assets/overview/assets/resource_3fa48481346f.js"></script>
+<script src="assets/overview/assets/lucide_latest_2eebd0ebe8c2.js"></script>
+<script src="assets/overview/assets/js/tailwind-config.js"></script>
+<style>
+/* ================================================================ catalog shell
+   Routing and layout only. The navbar is the Overview's own <nav> (logo, uppercase link type,
+   particle button), drawn over the frame exactly where the page's in-flow nav sits and scrolled
+   with the page; the page hides its own copy while embedded. */
+html, body { height: 100%; }
+body { overflow: hidden; }
+#overview-frame { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; z-index: 0; background: #050505; }
+#ds-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; pointer-events: none; will-change: transform; }
+#ds-nav nav > * { pointer-events: auto; }
+#ds-nav .ds-link { position: relative; }
+#ds-nav .ds-link.is-on { color: #fff; }
+#ds-nav .ds-link.is-on::after { content: ""; position: absolute; left: 50%; bottom: -10px; width: 4px; height: 4px; margin-left: -2px; border-radius: 9999px; background: #f97316; }
+#ds-nav [aria-disabled="true"] { opacity: .35; pointer-events: none; }
+/* the page hides its link row under 768px; the catalog keeps its two views visible */
+@media (max-width: 767px) { #ds-nav .ds-links { gap: 22px; } }
+
+/* ------------------------------------------------------------ components view
+   Scoped to the Components view; the Overview frame is untouched (hidden behind it).
+   Live ground: the page's own fixed background stack (Unicorn Studio aura, landscape overlay,
+   vertical grid with falling beams). Navbar strip and sidebar carry their own dark glass. */
+#view-components { position: fixed; inset: 0; z-index: 10; display: none; overflow: hidden; background: #050505; }
+body.is-components #view-components { display: block; }
+body.is-components #overview-frame { visibility: hidden; }
+body.is-components #ds-nav { transform: none !important; }
+#ds-nav-back { position: fixed; top: 0; left: 0; right: 0; height: var(--ds-navh, 108px); z-index: 40; display: none;
+  background: rgba(5, 5, 5, .84); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255, 255, 255, .08); }
+body.is-components #ds-nav-back { display: block; }
+#ds-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+#ds-shell { position: absolute; z-index: 2; top: var(--ds-navh, 108px); left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 244px minmax(0, 1fr); }
+
+/* sidebar: its own dark glass plate, the page's uppercase link type and orange dot */
+#ds-side { position: relative; min-height: 0; overflow-y: auto; padding: 22px 14px 40px 22px; scrollbar-width: none; }
+#ds-side::-webkit-scrollbar { display: none; }
+#ds-side nav { display: flex; flex-direction: column; gap: 2px; padding: 14px 10px; border-radius: 14px; background: rgba(10, 10, 10, .86);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, .1); box-shadow: 0 20px 50px rgba(0, 0, 0, .5); }
+#ds-side .ds-side-h { padding: 4px 12px 8px; font: 700 10px/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: rgba(249, 115, 22, .85); }
+#ds-side .ds-side-h:not(:first-child) { margin-top: 10px; }
+#ds-side a { position: relative; display: flex; align-items: baseline; gap: 10px; padding: 7px 12px; border-radius: 8px;
+  font: 500 11.5px/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; color: #a3a3a3; transition: color .2s, background-color .2s; }
+#ds-side a b { font: 400 10.5px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; color: #737373; letter-spacing: 0; }
+#ds-side a:hover { color: #fff; background: rgba(255, 255, 255, .05); }
+#ds-side a.is-current { color: #fff; background: rgba(255, 255, 255, .07); }
+#ds-side a.is-current b { color: #f97316; }
+
+#ds-main { position: relative; min-width: 0; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 22px clamp(20px, 3.4vw, 52px) 160px 26px; }
+.ds-group { max-width: 1120px; padding-bottom: 120px; }
+.ds-head { margin: 0 0 44px; padding: 0 2px; }
+.ds-head .ds-eyebrow { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px; padding: 6px 12px 6px 10px; border-radius: 9999px; background: rgba(5, 5, 5, .72); }
+.ds-sub { display: flex; align-items: center; gap: 10px; margin: 52px 0 18px; font: 700 11.5px/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #e5e5e5; text-shadow: 0 1px 10px rgba(0, 0, 0, .9); }
+.ds-sub::before { content: ""; width: 6px; height: 6px; border-radius: 9999px; background: #f97316; }
+.ds-head + .ds-sub { margin-top: 0; }
+.ds-spec { margin: 0 0 64px; }
+.ds-spec:last-child { margin-bottom: 0; }
+.ds-spec-title { margin: 0 0 18px; font: 500 22px/1.2 ui-sans-serif, system-ui, sans-serif; letter-spacing: -.02em; color: #fff; text-shadow: 0 1px 12px rgba(0, 0, 0, .8); }
+/* captions carry their own dark backing so metadata stays legible over the live ground */
+.ds-cap { display: inline-block; max-width: 100%; margin-top: 16px; padding: 8px 12px; border-radius: 8px; background: rgba(5, 5, 5, .8); border: 1px solid rgba(255, 255, 255, .08); }
+.ds-meta { display: block; font: 400 11.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: #e5e5e5; overflow-wrap: anywhere; }
+.ds-meta b { font-weight: 600; color: #fff; }
+.ds-note { display: inline-block; max-width: 82ch; margin-top: 18px; padding: 9px 13px; border-radius: 8px; background: rgba(5, 5, 5, .78); border: 1px solid rgba(255, 255, 255, .06);
+  font: 400 13px/1.6 ui-sans-serif, system-ui, sans-serif; color: #d4d4d4; }
+.ds-note code { font: 11.5px ui-monospace, SFMono-Regular, Menlo, monospace; color: #fff; }
+.ds-row { display: flex; flex-wrap: wrap; align-items: center; gap: 28px 40px; }
+.ds-top { align-items: flex-start; }
+.ds-cell { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; min-width: 0; }
+.ds-cell > small, .ds-state small { font: 700 10px/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #d4d4d4; }
+.ds-stage { position: relative; overflow: hidden; padding: 40px; border-radius: 16px; background: rgba(5, 5, 5, .55); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08); }
+.ds-ground { background: #050505; }
+.ds-w-sm { width: 100%; max-width: 380px; }
+.ds-w-md { width: 100%; max-width: 560px; }
+.ds-hold, .ds-hold * { animation-play-state: paused !important; }
+#ds-main .ds-replay { display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; padding: 7px 14px; border-radius: 9999px; background: rgba(255, 255, 255, .05);
+  border: 1px solid rgba(255, 255, 255, .12); color: #fff; font: 500 11px/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; }
+#ds-main .ds-replay:hover { background: rgba(255, 255, 255, .1); }
+
+/* typography: role | live sample | declared size */
+.ds-types { border-radius: 16px; background: rgba(5, 5, 5, .72); border: 1px solid rgba(255, 255, 255, .08); padding: 0 28px; }
+.ds-type { display: grid; grid-template-columns: 200px minmax(0, 1fr) 190px; gap: 28px; align-items: center; padding: 26px 0; border-top: 1px solid rgba(255, 255, 255, .07); }
+.ds-type:first-child { border-top: 0; }
+.ds-type .role { font: 600 14px/1.3 ui-sans-serif, system-ui, sans-serif; color: #fff; }
+.ds-type .face { margin-top: 4px; font: 400 12.5px/1.45 ui-sans-serif, system-ui, sans-serif; color: #d4d4d4; }
+.ds-type .ds-meta { margin-top: 6px; font-size: 10.5px; color: #a3a3a3; }
+.ds-type .sample { min-width: 0; overflow-wrap: anywhere; }
+.ds-type .sample > * { margin: 0 !important; }
+#ds-main .ds-type [data-fit] { font-size: clamp(3.5rem, 11vw, 10rem); }
+.ds-type .sizes { text-align: right; font: 400 11.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: #e5e5e5; }
+
+/* colors: live chip on its surface + label, value, token, use */
+.ds-colors { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px 18px; }
+.ds-sw { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 14px; align-items: start; padding: 10px; border-radius: 12px; background: rgba(5, 5, 5, .74); border: 1px solid rgba(255, 255, 255, .07); }
+.ds-chip { position: relative; height: 76px; overflow: hidden; display: grid; place-items: center; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); }
+:where(.ds-chip) { background: #050505; }
+.ds-chip .fill { position: absolute; inset: 0; }
+.ds-chip .edge { position: absolute; inset: 16px; }
+.ds-chip .aa { position: relative; font-size: 30px; font-weight: 500; line-height: 1; letter-spacing: -.05em; }
+.ds-sw strong, .ds-fam > strong { display: block; font: 600 13px/1.35 ui-sans-serif, system-ui, sans-serif; color: #fff; }
+.ds-sw code { display: block; margin-top: 3px; font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: #e5e5e5; overflow-wrap: anywhere; }
+.ds-sw code.tok { color: #fb923c; }
+.ds-sw p { margin-top: 4px; font: 400 12px/1.45 ui-sans-serif, system-ui, sans-serif; color: #a3a3a3; }
+.ds-fam { margin-bottom: 22px; padding: 14px; border-radius: 12px; background: rgba(5, 5, 5, .74); border: 1px solid rgba(255, 255, 255, .07); }
+.ds-fam > strong { margin-bottom: 12px; }
+.ds-states { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+.ds-state { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ds-state code { font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: #e5e5e5; overflow-wrap: anywhere; }
+
+/* backgrounds: every layer lives in its own clipped window (transform makes `fixed` layers local) */
+.ds-window { position: relative; overflow: hidden; height: min(62vh, 520px); border-radius: 16px; background: #050505; transform: translateZ(0); isolation: isolate; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); }
+.ds-window.is-short { height: 300px; }
+.ds-window .ds-win-cap { position: absolute; left: 14px; bottom: 14px; z-index: 60; }
+
+/* surfaces */
+.ds-surfaces { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+.ds-surface { margin: 0; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.ds-surface .ds-stage { height: 210px; padding: 24px; display: grid; place-items: center; }
+.ds-surface .ds-cap { margin-top: 0; display: block; }
+.ds-surface strong { display: block; margin-bottom: 2px; font: 600 13px/1.35 ui-sans-serif, system-ui, sans-serif; color: #fff; }
+
+/* icons: five to a row, identifier under each, source size and colour */
+.ds-icons { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 34px 16px; padding: 30px 22px; border-radius: 16px; background: rgba(5, 5, 5, .72); border: 1px solid rgba(255, 255, 255, .08); }
+.ds-icon { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; min-width: 0; }
+.ds-icon .stage-i { min-height: 40px; display: grid; place-items: center; }
+.ds-icon code { font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; color: #fff; overflow-wrap: anywhere; }
+.ds-icon code i { display: block; margin-top: 2px; font-style: normal; color: #a3a3a3; }
+
+/* motion */
+.ds-motion { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.ds-motion .ds-stage { height: 230px; padding: 24px; display: grid; place-items: center; }
+.ds-trans { border-radius: 16px; background: rgba(5, 5, 5, .72); border: 1px solid rgba(255, 255, 255, .08); padding: 0 24px; }
+.ds-trans > div { display: grid; grid-template-columns: 220px minmax(0, 1fr) 170px; gap: 24px; align-items: center; padding: 16px 0; border-top: 1px solid rgba(255, 255, 255, .07); }
+.ds-trans > div:first-child { border-top: 0; }
+.ds-trans strong { font: 600 13px/1.35 ui-sans-serif, system-ui, sans-serif; color: #fff; }
+.ds-trans .ds-meta { color: #d4d4d4; }
+.ds-trans span { text-align: right; font: 11.5px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: #fff; }
+
+/* component stages */
+.ds-navstage { position: relative; overflow: hidden; border-radius: 16px; background: #050505; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); }
+.ds-fitbox { overflow: hidden; border-radius: 16px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); }
+.ds-fit { width: 100vw; background: #050505; }            /* zoomed to the column by script */
+.ds-phone-stage { display: flex; justify-content: center; padding: 56px 24px; }
+</style>
+<style>
+/* background windows: the page's 100vh layers fill the window */
+.ds-window .h-screen { height: 100%; }
+/* specimens keep their own negative-z glows above the stage ground */
+.ds-stage, .ds-navstage { isolation: isolate; }
+/* a specimen's leading section margin (mt-10 / mt-24) is dropped inside its stage */
+#ds-main .ds-stage > .mt-10:first-child, #ds-main .ds-stage > .mt-24:first-child { margin-top: 0; }
+/* absolutely placed badges shown in flow */
+.ds-flowbox > * { position: static !important; }
+/* ------------------------------------------------------------ components view: narrower windows */
+@media (max-width: 1100px) {
+  .ds-type { grid-template-columns: 170px minmax(0, 1fr); }
+  .ds-type .sizes { grid-column: 2; text-align: left; }
+  .ds-trans > div { grid-template-columns: 180px minmax(0, 1fr); }
+  .ds-trans span { grid-column: 2; text-align: left; }
+}
+@media (max-width: 767px) {
+  #ds-shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  #ds-side { overflow-x: auto; overflow-y: hidden; padding: 12px 16px 10px; background: rgba(5, 5, 5, .84); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(255, 255, 255, .08); }
+  #ds-side nav { flex-direction: row; align-items: center; width: max-content; gap: 2px; padding: 5px 6px; border-radius: 9999px; box-shadow: none; }
+  #ds-side .ds-side-h { display: none; }
+  #ds-side a { flex: 0 0 auto; white-space: nowrap; padding: 6px 11px; border-radius: 9999px; font-size: 11px; }
+  #ds-main { padding: 26px 16px 120px; }
+  .ds-group { padding-bottom: 88px; }
+  .ds-head { margin-bottom: 32px; }
+  .ds-types { padding: 0 16px; }
+  .ds-type { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .ds-type .sizes { grid-column: auto; }
+  .ds-colors { grid-template-columns: minmax(0, 1fr); }
+  .ds-icons { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 24px 12px; }
+  .ds-motion { grid-template-columns: minmax(0, 1fr); }
+  .ds-trans { padding: 0 16px; }
+  .ds-trans > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .ds-trans span { grid-column: auto; text-align: left; }
+  #ds-main .ds-stage { padding: 28px 16px; }
+  .ds-window { height: 340px; }
+  .ds-window.is-short { height: 240px; }
+  .ds-phone-stage { padding: 32px 0; }
+  /* the 340 px phone (6 px bezel, -2deg tilt) is scaled to the phone column */
+  .ds-phone-stage > * { zoom: .8; }
+  /* the page's nav (logo + sign-in + button) is a few px wider than the phone column */
+  .ds-navstage > nav { zoom: .88; }
+}
+</style>
+</head>
+<body class="bg-[#050505] text-white font-sans antialiased overflow-x-hidden selection:bg-orange-500/30">
+
+<!-- navigation: the Overview's own <nav> (gradient logo, uppercase link row, particle button);
+     its link row routes the two views -->
+<div id="ds-nav-back" aria-hidden="true"></div>
+<div id="ds-nav">
+<div class="w-full max-w-7xl mr-auto ml-auto">
+<nav class="flex justify-between items-center py-8 px-6 md:px-10 [animation:fadeSlideIn_1s_cubic-bezier(0.2,0.8,0.2,1)_0.1s_both]">
+<a class="flex items-center gap-3 group cursor-pointer" href="#overview" data-ds-goto="" aria-label="Lumina">
+<div class="flex bg-gradient-to-tr from-orange-500 to-amber-500 w-8 h-8 rounded-full items-center justify-center" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); --border-radius-before: 9999px;">
+<div class="w-2.5 h-2.5 bg-black rounded-full" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)); --border-radius-before: 9999px"></div>
+</div>
+<span class="text-lg font-semibold tracking-tight text-white">Lumina</span>
+</a>
+<div class="flex items-center gap-8 ds-links">
+<a class="text-xs font-medium tracking-widest uppercase hover:text-white transition-colors text-neutral-400 ds-link" id="nav-overview" href="#overview">Overview</a>
+<a class="text-xs font-medium tracking-widest uppercase hover:text-white transition-colors text-neutral-400 ds-link" id="nav-components" href="#components">Components</a>
+</div>
+<div class="hidden md:flex items-center gap-6 ds-actions">
+<a class="text-sm font-medium hover:text-white transition-colors text-neutral-400" href="#" data-ds-inert="">Entrar</a>
+<button class="button-custom scale-95" type="button">
+<div class="points_wrapper">
+<i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+</div>
+<span class="inner">Lorem Ipsum</span>
+</button>
+</div>
+</nav>
+</div>
+</div>
+
+<iframe id="overview-frame" title="Overview" src="assets/overview/design-system.html"></iframe>
+
+<div id="view-components">
+<!-- live background: the page's own fixed stack — Unicorn Studio aura (WebGL), landscape overlay with
+     its gradients, and the vertical grid with falling orange beams -->
+<div id="ds-bg" aria-hidden="true">
+<div class="aura-background-component fixed top-0 w-full h-screen -z-10 hue-rotate-90 saturate-50 mix-blend-screen" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent)">
+<div class="aura-background-component top-0 w-full -z-10 absolute h-full">
+<div class="absolute w-full h-full left-0 top-0 -z-10" data-us-project="ILgOO23w4wEyPQOKyLO4"></div>
+</div>
+</div>
+<div class="fixed z-0 top-0 right-0 bottom-0 left-0">
+<img alt="" class="w-full h-full object-cover opacity-40 mix-blend-luminosity" src="assets/overview/assets/2b5079f4-4ddd-433b-a936-fc8f7d_7da21e998877.webp"/>
+<div class="absolute inset-0 bg-gradient-to-b from-[#050505]/90 via-[#050505]/60 to-[#050505]"></div>
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-orange-900/10 via-[#050505]/0 to-[#050505]/0"></div>
+</div>
+<div class="fixed inset-0 z-0 pointer-events-none flex w-full max-w-7xl mx-auto border-r border-white/5 opacity-60">
+<div class="flex-1 border-l border-white/5 h-full relative overflow-hidden"><span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">01</span></div>
+<div class="flex-1 border-l border-white/5 h-full relative overflow-hidden"><div class="absolute top-0 -left-[1px] w-[1px] h-64 bg-gradient-to-b from-transparent via-orange-500/60 to-transparent animate-beam-1"></div><span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">02</span></div>
+<div class="flex-1 border-l border-white/5 h-full flex justify-center relative overflow-hidden"><div class="absolute top-0 -left-[1px] w-[1px] h-96 bg-gradient-to-b from-transparent via-orange-500/80 to-transparent animate-beam-2"></div><div class="h-full border-r border-dashed border-orange-500/20 w-px"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-64 bg-gradient-to-b from-transparent via-orange-500 to-transparent animate-beam-1" style="animation-delay: 1.5s;"></div><div class="absolute bottom-[30%] translate-y-1/2 text-orange-500/80 rotate-90"><i data-lucide="play" class="w-4 h-4 fill-current"></i></div><span class="absolute bottom-8 text-orange-500/30 text-xs font-mono">03</span></div>
+<div class="flex-1 border-l border-white/5 h-full relative overflow-hidden"><div class="absolute top-0 -left-[1px] w-[1px] h-48 bg-gradient-to-b from-transparent via-orange-500/60 to-transparent animate-beam-3"></div><span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">04</span></div>
+<div class="flex-1 border-l border-white/5 h-full relative overflow-hidden"><span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">05</span></div>
+</div>
+</div>
+
+<div id="ds-shell">
+<aside id="ds-side">
+<nav aria-label="Components">
+<div class="ds-side-h">Foundations</div>
+<a href="#components-typography"><b>01</b>Typography</a>
+<a href="#components-colors"><b>02</b>Colors</a>
+<a href="#components-backgrounds"><b>03</b>Backgrounds</a>
+<a href="#components-surfaces"><b>04</b>Surfaces</a>
+<a href="#components-icons"><b>05</b>Icons</a>
+<a href="#components-motion"><b>06</b>Motion</a>
+<div class="ds-side-h">Components</div>
+<a href="#components-actions"><b>07</b>Actions</a>
+<a href="#components-navigation"><b>08</b>Navigation</a>
+<a href="#components-cards"><b>09</b>Cards</a>
+<a href="#components-data"><b>10</b>Data display</a>
+<a href="#components-badges"><b>11</b>Badges and status</a>
+<a href="#components-media"><b>12</b>Media</a>
+<a href="#components-content"><b>13</b>Content groups</a>
+</nav>
+</aside>
+<main id="ds-main">
+
+<!-- ============================================================ 01 typography -->
+<section class="ds-group" id="components-typography">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Foundations · 01</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Typography</h2>
+</div>
+<div class="ds-types">
+<div class="ds-type"><div><div class="role">Wordmark</div><div class="face">ui-sans-serif · 700 · tracking-tighter</div><code class="ds-meta">footer h1 .text-[17vw] · leading-[0.75] · mix-blend-overlay · opacity-90 · inside the footer's z-10 layer, over its texture</code></div><div class="sample"><div class="relative overflow-hidden rounded-lg bg-[#050505]" style="padding:18px 16px 0"><img alt="" class="opacity-20 mix-blend-luminosity w-full h-full object-cover absolute top-0 right-0 bottom-0 left-0 blur-sm" src="assets/overview/assets/4c087a1e-aa65-42f7-9a89-dc582f_965f3b40854f.webp"/><div class="relative z-10"><h1 class="leading-[0.75] font-bold tracking-tighter text-white mix-blend-overlay opacity-90 pointer-events-none" data-fit>LUMINA</h1></div></div></div><div class="sizes">17vw</div></div>
+<div class="ds-type"><div><div class="role">Display 1</div><div class="face">ui-sans-serif · 500 · tracking-tighter</div><code class="ds-meta">hero h1 · leading-[0.9] · span bg-gradient-to-r from-white via-neutral-200 to-neutral-500 bg-clip-text</code></div><div class="sample"><h1 class="text-6xl md:text-7xl lg:text-8xl leading-[0.9] tracking-tighter text-white font-medium">Lumina <span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-200 to-neutral-500">Design System</span></h1></div><div class="sizes">6rem | 4.5rem | 3.75rem</div></div>
+<div class="ds-type"><div><div class="role">Numeral XL</div><div class="face">ui-sans-serif · 300 · tracking-tighter</div><code class="ds-meta">stats grid value · leading-none · text-white</code></div><div class="sample"><div class="md:text-7xl lg:text-8xl leading-none text-6xl font-light text-white tracking-tighter">US$ 500M</div></div><div class="sizes">6rem | 4.5rem | 3.75rem</div></div>
+<div class="ds-type"><div><div class="role">Display link</div><div class="face">ui-sans-serif · 500 · tracking-tighter</div><code class="ds-meta">footer contact a · hover: bg-clip-text from-white to-neutral-500</code></div><div class="sample"><a class="relative z-10 text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter text-white" href="#">OLA@LUMINA.AI</a></div><div class="sizes">6rem | 4.5rem | 3rem</div></div>
+<div class="ds-type"><div><div class="role">Statement</div><div class="face">ui-sans-serif · 500 · tracking-tight</div><code class="ds-meta">about h3 · leading-[1.05] · text-white/40 · highlights span.text-white</code></div><div class="sample"><h3 class="leading-[1.05] md:text-6xl lg:text-7xl text-5xl font-medium text-white/40 tracking-tight"><span class="text-white">Lorem ipsum dolor</span> sit amet <span class="text-white">consectetur.</span></h3></div><div class="sizes">4.5rem | 3.75rem | 3rem</div></div>
+<div class="ds-type"><div><div class="role">Heading 1</div><div class="face">ui-sans-serif · 500 · tracking-tighter</div><code class="ds-meta">success-stories h2 · text-white</code></div><div class="sample"><h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Lorem Ipsum Sit</h2></div><div class="sizes">3.75rem | 3rem</div></div>
+<div class="ds-type"><div><div class="role">Numeral L</div><div class="face">ui-sans-serif · 500 · tracking-tight</div><code class="ds-meta">right-stats value · text-white</code></div><div class="sample"><div class="text-5xl md:text-6xl font-medium text-white tracking-tight">1.800%</div></div><div class="sizes">3.75rem | 3rem</div></div>
+<div class="ds-type"><div><div class="role">Heading 2</div><div class="face">ui-sans-serif · 400 · tracking-tighter</div><code class="ds-meta">headline h2 · span.text-white/60</code></div><div class="sample"><h2 class="text-4xl lg:text-5xl font-normal tracking-tighter text-white">Lorem ipsum dolor <span class="text-white/60">sit amet elit.</span></h2></div><div class="sizes">3rem | 2.25rem</div></div>
+<div class="ds-type"><div><div class="role">Stat label</div><div class="face">ui-sans-serif · 500</div><code class="ds-meta">stats grid label .text-xl · pl-1 · text-neutral-500 · right-stats .text-lg</code></div><div class="sample"><div class="text-xl font-medium pl-1 text-neutral-500">Lorem Ipsum Dolor</div></div><div class="sizes">1.25rem | 1.125rem</div></div>
+<div class="ds-type"><div><div class="role">Brand serif</div><div class="face">Instrument Serif · 400 (font-bold synthesised)</div><code class="ds-meta">phone app header .font-instrument-serif.font-bold.text-xl</code></div><div class="sample"><span class="font-instrument-serif font-bold text-xl tracking-tight text-white">Lumina</span></div><div class="sizes">1.25rem</div></div>
+<div class="ds-type"><div><div class="role">Lead</div><div class="face">ui-sans-serif · 500 · leading-relaxed</div><code class="ds-meta">hero p .text-lg · text-white/60 · max-w-lg</code></div><div class="sample"><p class="leading-relaxed text-lg font-medium text-white/60 max-w-lg">An amber WebGL aura over near-black, orange light beams falling through a vertical grid, frosted glass steps and glowing particle buttons.</p></div><div class="sizes">1.125rem</div></div>
+<div class="ds-type"><div><div class="role">Quote</div><div class="face">ui-sans-serif · 600 · leading-snug · tracking-tight</div><code class="ds-meta">testimonial p .text-lg · black on the orange card</code></div><div class="sample"><div class="text-black bg-gradient-to-b from-orange-400 to-orange-600 rounded-xl" style="padding:18px 20px"><p class="text-lg font-semibold leading-snug tracking-tight max-w-[80%]">"Lorem ipsum dolor sit amet consectetur elit."</p></div></div><div class="sizes">1.125rem</div></div>
+<div class="ds-type"><div><div class="role">Title S</div><div class="face">ui-sans-serif · 600 · tracking-tight</div><code class="ds-meta">logo span / case-row name .text-lg.font-semibold</code></div><div class="sample"><span class="text-lg font-semibold tracking-tight text-white">Lorem Dolorem</span></div><div class="sizes">1.125rem</div></div>
+<div class="ds-type"><div><div class="role">CTA label</div><div class="face">ui-sans-serif · 500 · tracking-tight</div><code class="ds-meta">hero CTA span .text-base · text-white/95</code></div><div class="sample"><span class="whitespace-nowrap font-medium tracking-tight text-base text-white/95">Lorem Ipsum</span></div><div class="sizes">1rem</div></div>
+<div class="ds-type"><div><div class="role">Body S</div><div class="face">ui-sans-serif · 400 · leading-relaxed</div><code class="ds-meta">case-study p .text-sm · text-neutral-300 · span.text-white.font-medium</code></div><div class="sample"><p class="text-sm leading-relaxed text-neutral-300 max-w-xs">Lorem ipsum dolor sit amet <span class="text-white font-medium">consectetur elit</span> sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim.</p></div><div class="sizes">0.875rem</div></div>
+<div class="ds-type"><div><div class="role">Button</div><div class="face">ui-sans-serif · 500</div><code class="ds-meta">.button-custom .inner (components.css) · white</code></div><div class="sample"><span class="inner" style="width:auto">Lorem Ipsum</span></div><div class="sizes">0.875rem</div></div>
+<div class="ds-type"><div><div class="role">Pill label</div><div class="face">ui-sans-serif · 500 · uppercase · tracking-wide</div><code class="ds-meta">about badge .text-sm · text-orange-400</code></div><div class="sample"><span class="text-orange-400 text-sm font-medium tracking-wide uppercase">Lorem Ipsum</span></div><div class="sizes">0.875rem</div></div>
+<div class="ds-type"><div><div class="role">Nav link</div><div class="face">ui-sans-serif · 500 · uppercase · tracking-widest</div><code class="ds-meta">nav a .text-xs · text-neutral-400 → hover:text-white</code></div><div class="sample"><a class="text-xs font-medium tracking-widest uppercase hover:text-white transition-colors text-neutral-400" href="#">Recursos</a></div><div class="sizes">0.75rem</div></div>
+<div class="ds-type"><div><div class="role">Eyebrow</div><div class="face">ui-sans-serif · 700 · uppercase · tracking-widest / 0.2em</div><code class="ds-meta">hero eyebrow .text-xs · text-orange-500/80 · footer label tracking-[0.2em] text-neutral-400</code></div><div class="sample"><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Lorem Ipsum 2.0</span></div><div class="sizes">0.75rem</div></div>
+<div class="ds-type"><div><div class="role">Micro label</div><div class="face">ui-sans-serif · 700 · uppercase · tracking-widest</div><code class="ds-meta">case-study label .text-[10px] · text-neutral-500 · badge text-black on orange</code></div><div class="sample"><span class="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Lorem</span></div><div class="sizes">10px</div></div>
+<div class="ds-type"><div><div class="role">Mono</div><div class="face">ui-monospace · 400</div><code class="ds-meta">grid index .text-xs.font-mono text-white/10 · status .text-[10px] text-white/80</code></div><div class="sample"><span class="text-[10px] font-mono text-white/80">Analisando...</span></div><div class="sizes">0.75rem | 10px</div></div>
+</div>
+<p class="ds-note">Every class is Tailwind's default <code>font-sans</code> stack (<code>ui-sans-serif, system-ui, sans-serif</code>). The page also loads Inter 300–700 (<code>css2_2832c0ff631d.css</code>) but never applies it; Instrument Serif 400 is used only by <code>.font-instrument-serif</code> in the phone mockup. Sizes are the Tailwind classes declared in the markup, widest breakpoint first; the wordmark is scaled to the column here.</p>
+</section>
+
+<!-- ============================================================ 02 colors -->
+<section class="ds-group" id="components-colors">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Foundations · 02</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Colors</h2>
+</div>
+
+<h3 class="ds-sub">Brand and Accent</h3>
+<div class="ds-colors">
+<div class="ds-sw"><div class="ds-chip"><span class="fill bg-orange-500"></span></div><div><strong>Primary orange</strong><code>#F97316</code><code class="tok">orange-500</code><p>Eyebrow dots, active step badge, 4K badge, beams (via), icons, logo gradient start</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="fill bg-orange-400"></span></div><div><strong>Light orange</strong><code>#FB923C</code><code class="tok">orange-400</code><p>Card gradient top, sparkles eyebrow, pill label, result highlight, avatar rings</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="fill" style="background:#ea580c"></span></div><div><strong>Deep orange</strong><code>#EA580C</code><code class="tok">orange-600</code><p>.button-custom base, card gradient bottom, CTA icon gradient end</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="fill bg-gradient-to-tr from-orange-500 to-amber-500"></span></div><div><strong>Logo gradient</strong><code>#F97316 → #F59E0B</code><code class="tok">from-orange-500 to-amber-500</code><p>Logo disc (bg-gradient-to-tr)</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="fill" style="background:radial-gradient(65.28% 65.28% at 50% 100%, rgba(251, 191, 36, 0.8) 0%, rgba(251, 191, 36, 0) 100%), linear-gradient(0deg, #ea580c, #ea580c)"></span></div><div><strong>Button amber glow</strong><code>rgba(251, 191, 36, 0.8) on #EA580C</code><p>Radial glow at the bottom of .button-custom and its ::after</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-neutral-950"><span class="fill" style="background:conic-gradient(from 0deg, transparent 0deg, transparent 80deg, rgba(253,186,116,0.8) 180deg, transparent 280deg, transparent 360deg)"></span></div><div><strong>Ring sweep</strong><code>rgba(253, 186, 116, 0.8)</code><p>Spinning conic border of the hero CTA (orange-300)</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="fill bg-gradient-to-r from-orange-600 to-amber-600 blur opacity-40"></span></div><div><strong>Card glow</strong><code>#EA580C → #D97706 · blur · opacity .2 / .4</code><code class="tok">from-orange-600 to-amber-600</code><p>Halo behind the testimonial card</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-black"><span class="edge rounded-full bg-gradient-to-tr from-orange-400 to-pink-600" style="inset:14px 22px"></span></div><div><strong>Story ring</strong><code>#FB923C → #DB2777</code><code class="tok">from-orange-400 to-pink-600</code><p>Active story rings in the phone mockup</p></div></div>
+</div>
+
+<h3 class="ds-sub">Surfaces</h3>
+<div class="ds-colors">
+<div class="ds-sw"><div class="ds-chip bg-[#050505]"></div><div><strong>Page ground</strong><code>#050505</code><code class="tok">bg-[#050505]</code><p>body, footer, overlay gradient end</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-[#050505]"><span class="edge bg-[#0a0a0a] rounded-xl border-[6px] border-[#1a1a1a]" style="inset:8px 16px"></span></div><div><strong>Device screen · bezel</strong><code>#0A0A0A · #1A1A1A</code><code class="tok">bg-[#0a0a0a] · border-[#1a1a1a]</code><p>Phone mockup body and 6 px frame</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-[#0a0a0a]"><span class="edge bg-[#111]" style="inset:10px"></span></div><div><strong>Media well</strong><code>#111111</code><code class="tok">bg-[#111]</code><p>Square feed-post frame</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-[#050505]"><span class="edge bg-neutral-900 rounded-lg border border-white/10" style="inset:14px 10px"></span></div><div><strong>Card base</strong><code>#171717</code><code class="tok">neutral-900</code><p>Card-stack items under their images</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="edge bg-neutral-950/90 rounded-full backdrop-blur-xl" style="inset:22px 8px"></span></div><div><strong>CTA plate</strong><code>rgba(10, 10, 10, 0.9)</code><code class="tok">neutral-950/90</code><p>Inner plate of the hero CTA, over its ring</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="edge bg-white/5 rounded-lg backdrop-blur-md" style="inset:22px 8px"></span></div><div><strong>Glass</strong><code>rgba(255, 255, 255, 0.05)</code><code class="tok">white/5</code><p>Active step, step hover, pill badge, contact chip</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="edge bg-white/[0.02]" style="inset:22px 0"></span></div><div><strong>Row hover</strong><code>rgba(255, 255, 255, 0.02)</code><code class="tok">white/[0.02]</code><p>Case-study row on hover</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-neutral-800"><span class="edge bg-black rounded-full" style="inset:14px 22px"></span></div><div><strong>Black · muted ring</strong><code>#000000 · #262626</code><code class="tok">black · neutral-800</code><p>Notch, story centres, +2k avatar · inactive story ring</p></div></div>
+</div>
+
+<h3 class="ds-sub">Text and Icons</h3>
+<div class="ds-colors">
+<div class="ds-sw"><div class="ds-chip"><span class="aa text-white">Aa</span></div><div><strong>Primary text</strong><code>#FFFFFF</code><code class="tok">white</code><p>Headings, logo, numerals, active step</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="aa text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-200 to-neutral-500">Aa</span></div><div><strong>Title gradient</strong><code>#FFFFFF → #E5E5E5 → #737373</code><code class="tok">from-white via-neutral-200 to-neutral-500</code><p>Second line of the hero title (bg-clip-text)</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="aa text-white/60">Aa</span></div><div><strong>Secondary text</strong><code>rgba(255, 255, 255, 0.6)</code><code class="tok">white/60</code><p>Hero lead, heading tail</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="aa text-white/40">Aa</span></div><div><strong>Dimmed statement</strong><code>rgba(255, 255, 255, 0.4)</code><code class="tok">white/40</code><p>About statement base (highlights in white)</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="aa text-neutral-300">Aa</span></div><div><strong>Body text</strong><code>#D4D4D4</code><code class="tok">neutral-300</code><p>Case-study paragraphs, feed caption</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="aa text-neutral-400">Aa</span></div><div><strong>Nav text</strong><code>#A3A3A3</code><code class="tok">neutral-400</code><p>Nav links, sign-in, inactive steps, story labels</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="aa text-neutral-500">Aa</span></div><div><strong>Muted text</strong><code>#737373</code><code class="tok">neutral-500</code><p>Stat labels, micro labels, legal links, notes</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="aa text-neutral-600">Aa</span></div><div><strong>Faint icons</strong><code>#525252 · #404040</code><code class="tok">neutral-600 · neutral-700</code><p>Social icons, row chevrons · copyright line</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-gradient-to-b from-orange-400 to-orange-600"><span class="aa text-black">Aa</span></div><div><strong>Text on orange</strong><code>#000000 · rgba(0, 0, 0, 0.4)</code><code class="tok">black · black/40</code><p>Testimonial copy, badge text · quote icon</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="aa text-orange-500">Aa</span></div><div><strong>Accent text and icons</strong><code>#F97316 · rgba(249, 115, 22, 0.8)</code><code class="tok">orange-500 · orange-500/80</code><p>Eyebrow, active label, check, video icon, play marker</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="aa text-white/10 font-mono" style="font-size:22px">01</span></div><div><strong>Grid index</strong><code>rgba(255, 255, 255, 0.1) · orange-500/30</code><code class="tok">white/10</code><p>Column numbers of the beam grid (03 in orange)</p></div></div>
+</div>
+
+<h3 class="ds-sub">Borders</h3>
+<div class="ds-colors">
+<div class="ds-sw"><div class="ds-chip"><span class="edge border-t border-white/5" style="inset:37px 0 auto"></span><span class="edge border-l border-white/5" style="inset:0 auto 0 37px"></span></div><div><strong>Hairline</strong><code>rgba(255, 255, 255, 0.05) · 1px</code><code class="tok">border-white/5</code><p>Section rules, grid columns, row dividers</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="edge rounded-lg border border-white/10"></span></div><div><strong>Card edge</strong><code>rgba(255, 255, 255, 0.1)</code><code class="tok">border-white/10</code><p>Card-stack items, pill badge, contact chip</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-neutral-900"><span class="edge rounded-full border border-white/20" style="inset:14px 22px"></span></div><div><strong>Glass ring</strong><code>rgba(255, 255, 255, 0.2)</code><code class="tok">border-white/20</code><p>Play button, CTA icon ring (ring-white/20)</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="edge rounded-lg" style="position:absolute;--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); --border-radius-before: 8px"></span></div><div><strong>Gradient border</strong><code>rgba(255,255,255, .5 | .4 | .3 | .1) → 0</code><code class="tok">--border-gradient</code><p>Mask-composited 1 px top-lit edge on logo, steps, card, tiles</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="edge border-r border-dashed border-orange-500/20" style="inset:0 37px 0 auto"></span></div><div><strong>Dashed guide</strong><code>rgba(249, 115, 22, 0.2)</code><code class="tok">border-orange-500/20</code><p>Centre rule of the beam grid</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-gradient-to-b from-orange-400 to-orange-600"><span class="edge rounded-full border-2 border-orange-400 bg-black" style="inset:20px 28px"></span><span class="edge border-t border-black/10" style="inset:auto 8px 10px"></span></div><div><strong>On-orange edges</strong><code>#FB923C 2px · rgba(0, 0, 0, 0.1)</code><code class="tok">border-orange-400 · border-black/10</code><p>Avatar rings, testimonial divider</p></div></div>
+</div>
+
+<h3 class="ds-sub">Semantic</h3>
+<div class="ds-colors">
+<div class="ds-sw"><div class="ds-chip bg-neutral-900"><span class="w-2 h-2 bg-green-400 rounded-full animate-pulse" style="position:relative;width:14px;height:14px"></span></div><div><strong>Live / processing</strong><code>#4ADE80</code><code class="tok">green-400</code><p>Pulsing status dot on the processing card</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-[#0a0a0a]"><span class="aa text-blue-400" style="font-size:20px">#Tag</span></div><div><strong>Hashtag link</strong><code>#60A5FA</code><code class="tok">blue-400</code><p>Hashtag in the feed caption</p></div></div>
+</div>
+
+<!-- colors, continued: interactive states and overlays (still inside the colors group) -->
+<h3 class="ds-sub">Interactive States</h3>
+<div class="ds-fam"><strong>Step item (interactions.js)</strong><div class="ds-states">
+<div class="ds-state"><div class="ds-chip"><span class="edge rounded-lg flex items-center gap-2 px-2 text-neutral-400 text-xs font-medium" style="inset:22px 8px"><b class="text-[10px] text-neutral-500">02</b>Aa</span></div><small>Default</small><code>transparent · text #A3A3A3 · badge #737373 · icon opacity 0</code></div>
+<div class="ds-state"><div class="ds-chip"><span class="edge rounded-lg bg-white/5 flex items-center gap-2 px-2 text-white text-xs font-medium" style="inset:22px 8px"><b class="text-[10px] text-orange-400">02</b>Aa</span></div><small>Hover</small><code>bg white/5 · text #FFFFFF · badge #FB923C · icon white</code></div>
+<div class="ds-state"><div class="ds-chip"><span class="edge rounded-lg bg-white/5 backdrop-blur-md shadow-xl flex items-center gap-2 px-2 text-white text-xs font-medium" style="inset:22px 8px;--border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 8px"><b class="w-4 h-4 rounded-full bg-orange-500 text-black text-[8px] grid place-items-center">01</b>Aa</span></div><small>Selected</small><code>bg white/5 · blur-md · shadow-xl · translate-x -10px · badge #F97316 on black</code></div>
+</div></div>
+<div class="ds-fam"><strong>Hero CTA pill</strong><div class="ds-states">
+<div class="ds-state"><div class="ds-chip bg-neutral-950 shadow-[0_0_25px_rgba(249,115,22,0.3),0_8px_40px_rgba(249,115,22,0.15)]"></div><small>Default</small><code>shadow 0 0 25px rgba(249,115,22,.3), 0 8px 40px rgba(249,115,22,.15)</code></div>
+<div class="ds-state"><div class="ds-chip bg-neutral-950 shadow-[0_0_50px_10px_rgba(249,115,22,0.45)]"></div><small>Hover</small><code>scale 1.05 · shadow 0 0 50px 10px rgba(249,115,22,.45) · icon scale 1.1</code></div>
+</div></div>
+<div class="ds-fam"><strong>Text links</strong><div class="ds-states">
+<div class="ds-state"><div class="ds-chip"><span class="aa text-neutral-400" style="font-size:20px">Aa</span></div><small>Default</small><code>#A3A3A3 (nav) · #737373 (legal) · #525252 (social)</code></div>
+<div class="ds-state"><div class="ds-chip"><span class="aa text-white" style="font-size:20px">Aa</span></div><small>Hover</small><code>#FFFFFF · social icons scale 1.1</code></div>
+</div></div>
+<div class="ds-fam"><strong>Case-study row</strong><div class="ds-states">
+<div class="ds-state"><div class="ds-chip"><span class="aa text-neutral-500" style="font-size:12px;letter-spacing:.2em">LOREM</span></div><small>Default</small><code>label #737373 · chevron #525252</code></div>
+<div class="ds-state"><div class="ds-chip bg-white/[0.02]"><span class="aa text-white" style="font-size:12px;letter-spacing:.2em">LOREM</span></div><small>Hover</small><code>bg white/[0.02] · label + chevron #FFFFFF</code></div>
+<div class="ds-state"><div class="ds-chip"><span class="aa text-orange-500" style="font-size:12px;letter-spacing:.2em">LOREM</span></div><small>Selected</small><code>expanded row · label #F97316 · minus icon white</code></div>
+</div></div>
+<div class="ds-fam"><strong>Logo wall</strong><div class="ds-states">
+<div class="ds-state"><div class="ds-chip"><img src="assets/overview/assets/images/svg/logo-adobe.svg" class="opacity-60 grayscale" style="position:relative;width:80%;height:24px" alt=""/></div><small>Default</small><code>grayscale · opacity .6</code></div>
+<div class="ds-state"><div class="ds-chip"><img src="assets/overview/assets/images/svg/logo-adobe.svg" class="opacity-60" style="position:relative;width:80%;height:24px" alt=""/></div><small>Hover</small><code>hover:grayscale-0 (row) · opacity .6</code></div>
+</div></div>
+
+<h3 class="ds-sub">Overlays</h3>
+<div class="ds-colors">
+<div class="ds-sw"><div class="ds-chip"><img alt="" class="fill w-full h-full object-cover opacity-40 mix-blend-luminosity" src="assets/overview/assets/2b5079f4-4ddd-433b-a936-fc8f7d_7da21e998877.webp"/><span class="fill bg-gradient-to-b from-[#050505]/90 via-[#050505]/60 to-[#050505]"></span></div><div><strong>Ground fade</strong><code>rgba(5,5,5,.9) → .6 → #050505</code><code class="tok">from-[#050505]/90 via-[#050505]/60 to-[#050505]</code><p>Over the landscape layer of the page ground</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="fill bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-orange-900/10 via-[#050505]/0 to-[#050505]/0"></span></div><div><strong>Ember vignette</strong><code>rgba(124, 45, 18, 0.1) → 0</code><code class="tok">from-orange-900/10</code><p>Radial centre warmth over the ground</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><img alt="" class="fill w-full h-full object-cover" src="assets/overview/assets/c3337c33-82ae-4ad6-9c83-f9f1a5_1ba1c854e7ba.webp"/><span class="fill bg-black/40"></span></div><div><strong>Media dim</strong><code>rgba(0, 0, 0, 0.4) · 0.2</code><code class="tok">black/40 · black/20</code><p>Back cards of the stack</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><span class="edge bg-orange-500/20 blur-2xl rounded-full" style="inset:8px"></span></div><div><strong>Orange glow</strong><code>rgba(249, 115, 22, 0.2 | 0.1 | 0.3)</code><code class="tok">orange-500/20 · /10 · /30</code><p>blur-3xl / blur-[120px] / blur-2xl halos behind stack, statement, phone, post</p></div></div>
+<div class="ds-sw"><div class="ds-chip"><img alt="" class="fill w-full h-full object-cover opacity-20 mix-blend-luminosity blur-sm" src="assets/overview/assets/4c087a1e-aa65-42f7-9a89-dc582f_965f3b40854f.webp"/><span class="fill bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/80"></span></div><div><strong>Footer fade</strong><code>#050505 → transparent → rgba(5,5,5,.8)</code><code class="tok">bg-gradient-to-t</code><p>Over the footer texture</p></div></div>
+<div class="ds-sw"><div class="ds-chip bg-neutral-800"><span class="edge bg-black/60 backdrop-blur border border-white/10 rounded-full" style="inset:26px 8px"></span></div><div><strong>Media chip</strong><code>rgba(0, 0, 0, 0.6) · blur</code><code class="tok">black/60</code><p>“Gerado por IA” pill over the feed image</p></div></div>
+</div>
+</section>
+
+
+<!-- ============================================================ 03 backgrounds -->
+<section class="ds-group" id="components-backgrounds">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Foundations · 03</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Backgrounds</h2>
+</div>
+<p class="ds-note" style="margin:0 0 34px">The page ground is three fixed layers stacked on <code>#050505</code>: the Unicorn Studio aura, the landscape overlay and the beam grid. That composite is the live background of this whole view; each layer is shown on its own below, followed by the footer's texture ground. Inside each window the page's <code>fixed</code> layers are pinned to the window.</p>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Aura · Unicorn Studio WebGL</h3>
+<div class="ds-window">
+<div class="aura-background-component fixed top-0 w-full h-screen -z-10 hue-rotate-90 saturate-50 mix-blend-screen" data-alpha-mask="80" style="mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent)">
+<div class="aura-background-component top-0 w-full -z-10 absolute h-full">
+<div class="absolute w-full h-full left-0 top-0 -z-10" data-us-project="ILgOO23w4wEyPQOKyLO4"></div>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>.aura-background-component</b> fixed top-0 w-full h-screen -z-10 · <b>hue-rotate-90 saturate-50 mix-blend-screen</b> · mask linear-gradient(black 0% → 80%, transparent) · <b>[data-us-project="ILgOO23w4wEyPQOKyLO4"]</b> · unicornStudio.umd.js v1.4.29 (cdn.jsdelivr.net) · h-screen fitted to the window here</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Landscape overlay</h3>
+<div class="ds-window">
+<div class="fixed z-0 top-0 right-0 bottom-0 left-0">
+<img alt="" class="w-full h-full object-cover opacity-40 mix-blend-luminosity" src="assets/overview/assets/2b5079f4-4ddd-433b-a936-fc8f7d_7da21e998877.webp"/>
+<div class="absolute inset-0 bg-gradient-to-b from-[#050505]/90 via-[#050505]/60 to-[#050505]"></div>
+<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-orange-900/10 via-[#050505]/0 to-[#050505]/0"></div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>background-image-overlay</b> fixed inset-0 z-0 · img <b>2b5079f4…_7da21e998877.webp</b> object-cover opacity-40 mix-blend-luminosity · bg-gradient-to-b from-[#050505]/90 via-[#050505]/60 to-[#050505] · radial from-orange-900/10</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Vertical grid with falling beams</h3>
+<div class="ds-window">
+<div class="fixed inset-0 z-0 pointer-events-none flex w-full max-w-7xl mx-auto border-r border-white/5 opacity-60">
+<div class="flex-1 border-l border-white/5 h-full relative overflow-hidden"><span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">01</span></div>
+<div class="flex-1 border-l border-white/5 h-full relative overflow-hidden"><div class="absolute top-0 -left-[1px] w-[1px] h-64 bg-gradient-to-b from-transparent via-orange-500/60 to-transparent animate-beam-1"></div><span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">02</span></div>
+<div class="flex-1 border-l border-white/5 h-full flex justify-center relative overflow-hidden"><div class="absolute top-0 -left-[1px] w-[1px] h-96 bg-gradient-to-b from-transparent via-orange-500/80 to-transparent animate-beam-2"></div><div class="h-full border-r border-dashed border-orange-500/20 w-px"></div><div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-64 bg-gradient-to-b from-transparent via-orange-500 to-transparent animate-beam-1" style="animation-delay: 1.5s;"></div><div class="absolute bottom-[30%] translate-y-1/2 text-orange-500/80 rotate-90"><i data-lucide="play" class="w-4 h-4 fill-current"></i></div><span class="absolute bottom-8 text-orange-500/30 text-xs font-mono">03</span></div>
+<div class="flex-1 border-l border-white/5 h-full relative overflow-hidden"><div class="absolute top-0 -left-[1px] w-[1px] h-48 bg-gradient-to-b from-transparent via-orange-500/60 to-transparent animate-beam-3"></div><span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">04</span></div>
+<div class="flex-1 border-l border-white/5 h-full relative overflow-hidden"><span class="absolute bottom-8 left-4 text-white/10 text-xs font-mono">05</span></div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>vertical-grid-with-beams</b> fixed inset-0 z-0 · max-w-7xl · 5 × flex-1 border-l border-white/5 · opacity-60 · beams <b>.animate-beam-1/2/3</b> (beam-fall 6s / 8s / 7s linear infinite, delays 0 / 2s / 4s / 1.5s) · dashed centre border-orange-500/20 · play marker rotate-90</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Footer texture ground</h3>
+<div class="ds-window is-short">
+<div class="overflow-hidden bg-[#050505] w-full h-full relative">
+<div class="pointer-events-none z-0 absolute top-0 right-0 bottom-0 left-0">
+<div class="opacity-30 absolute top-0 right-0 bottom-0 left-0"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/80"></div>
+<div class="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+<img alt="" class="opacity-20 mix-blend-luminosity w-full h-full object-cover absolute top-0 right-0 bottom-0 left-0 blur-sm" src="assets/overview/assets/4c087a1e-aa65-42f7-9a89-dc582f_965f3b40854f.webp"/>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>footer-contact</b> bg-[#050505] · img <b>4c087a1e…_965f3b40854f.webp</b> opacity-20 mix-blend-luminosity blur-sm · bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/80 · noise opacity-[0.03] (grainy-gradients.vercel.app — answers 402, as in the page)</code></div>
+</div>
+</section>
+
+<!-- ============================================================ 04 surfaces -->
+<section class="ds-group" id="components-surfaces">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Foundations · 04</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Surfaces</h2>
+</div>
+<div class="ds-surfaces">
+<figure class="ds-surface">
+<div class="ds-stage"><div class="flex bg-white/5 rounded-lg shadow-xl backdrop-blur-md w-full" style="height:44px;position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 8px"></div></div>
+<div class="ds-cap"><strong>Frosted glass</strong><code class="ds-meta">active .step-item · bg-white/5 rounded-lg shadow-xl backdrop-blur-md · --border-gradient rgba(255,255,255,.1)→0</code></div>
+</figure>
+<figure class="ds-surface">
+<div class="ds-stage"><div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors" style="width:170px;height:34px"></div></div>
+<div class="ds-cap"><strong>Glass pill</strong><code class="ds-meta">about badge · rounded-full bg-white/5 border-white/10 backdrop-blur-sm · hover:bg-white/10</code></div>
+</figure>
+<figure class="ds-surface">
+<div class="ds-stage"><div class="relative group w-full"><div class="absolute -inset-1 bg-gradient-to-r from-orange-600 to-amber-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div><div class="flex flex-col h-[120px] transition-transform hover:-translate-y-1 duration-300 bg-gradient-to-b from-orange-400 to-orange-600 rounded-xl relative shadow-2xl" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0)); --border-radius-before: 12px"></div></div></div>
+<div class="ds-cap"><strong>Orange card</strong><code class="ds-meta">testimonial · bg-gradient-to-b from-orange-400 to-orange-600 rounded-xl shadow-2xl · edge .3 · halo -inset-1 blur opacity-20→40 · hover -translate-y-1</code></div>
+</figure>
+<figure class="ds-surface">
+<div class="ds-stage"><div class="relative w-full aspect-video rounded-lg overflow-hidden border border-white/10 shadow-2xl bg-neutral-900"><img alt="" class="w-full h-full object-cover opacity-70" src="assets/overview/assets/6e8af32c-e155-4b33-9e0a-eb91a9_c1c7ef5e7858.webp"/><div class="absolute inset-0 bg-black/20"></div></div></div>
+<div class="ds-cap"><strong>Media card</strong><code class="ds-meta">.card-stack-item · rounded-lg border-white/10 shadow-2xl bg-neutral-900 · img opacity-70 + bg-black/20</code></div>
+</figure>
+<figure class="ds-surface">
+<div class="ds-stage" style="background:#111"><div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-orange-500/30 rounded-full blur-2xl"></div><div class="group relative"><div class="transform group-hover:rotate-6 transition-transform duration-700 bg-gradient-to-b from-white/10 via-white/0 to-white/10 w-24 h-24 rounded-2xl shadow-[0_5.7px_8.6px_rgba(0,_0,_0,_0.07),_0_13.7px_10.9px_rgba(0,_0,_0,_0.099),_0_25.7px_20.5px_rgba(0,_0,_0,_0.123),_0_45.8px_36.6px_rgba(0,_0,_0,_0.147),_0_85.8px_68.5px_rgba(0,_0,_0,_0.176),_0_205px_163.4px_rgba(0,_0,_0,_0.246)] backdrop-blur-md rotate-12" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 16px"></div></div></div>
+<div class="ds-cap"><strong>Glass tile</strong><code class="ds-meta">feed-post tile · from-white/10 via-white/0 to-white/10 rounded-2xl backdrop-blur-md · 6-step layered shadow · rotate-12 → hover rotate-6</code></div>
+</figure>
+<figure class="ds-surface">
+<div class="ds-stage"><div class="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.2)]" style="transform:scale(2)"></div></div>
+<div class="ds-cap"><strong>Icon chip</strong><code class="ds-meta">footer contact chip · w-8 h-8 rounded-full bg-white/5 border-white/10 · shadow 0 0 15px rgba(249,115,22,.2) · shown at 2×</code></div>
+</figure>
+</div>
+</section>
+
+<!-- ============================================================ 05 icons -->
+<section class="ds-group" id="components-icons">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Foundations · 05</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Icons</h2>
+</div>
+<h3 class="ds-sub">Lucide (data-lucide, stroke-width 1.5)</h3>
+<div class="ds-icons">
+<figure class="ds-icon"><div class="stage-i"><span class="" style="display:inline-grid"><i data-lucide="play" class="w-4 h-4 fill-white text-white ml-1"></i></span></div><code>lucide · play<i>card play · also grid marker orange-500/80</i></code></figure>
+<figure class="ds-icon"><div class="stage-i"><span class="text-white/80" style="display:inline-grid"><i data-lucide="arrow-right" class="w-3 h-3"></i></span></div><code>lucide · arrow-right<i>hero CTA arrow · white/80</i></code></figure>
+<figure class="ds-icon"><div class="stage-i"><span class="" style="display:inline-grid"><i data-lucide="check" class="w-3.5 h-3.5 text-orange-500"></i></span></div><code>lucide · check<i>hero note</i></code></figure>
+<figure class="ds-icon"><div class="stage-i"><span class="" style="display:inline-grid"><i data-lucide="video" class="w-3 h-3 text-orange-500"></i></span></div><code>lucide · video<i>active step</i></code></figure>
+<figure class="ds-icon"><div class="stage-i"><span class="" style="display:inline-grid"><i data-lucide="scan-line" class="w-3 h-3 text-white"></i></span></div><code>lucide · scan-line<i>step 02 (hover)</i></code></figure>
+<figure class="ds-icon"><div class="stage-i"><span class="" style="display:inline-grid"><i data-lucide="download" class="w-3 h-3 text-white"></i></span></div><code>lucide · download<i>step 03 (hover)</i></code></figure>
+<figure class="ds-icon"><div class="stage-i"><span class="" style="display:inline-grid"><i data-lucide="sparkles" class="w-3 h-3 text-orange-400"></i></span></div><code>lucide · sparkles<i>headline eyebrow</i></code></figure>
+<figure class="ds-icon"><div class="stage-i"><span class="bg-gradient-to-b from-orange-400 to-orange-600 rounded-md p-2" style="display:inline-grid"><i data-lucide="quote" class="w-5 h-5 text-black/40 fill-black/20"></i></span></div><code>lucide · quote<i>testimonial · on orange</i></code></figure>
+</div>
+<h3 class="ds-sub">Inline SVG</h3>
+<div class="ds-icons">
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px;"><path d="M3.845 3.845a2.883 2.883 0 0 0 0 4.077L5.432 9.51c.012-.014.555.503.568.49l4-4c.013-.013-.504-.556-.49-.568L7.922 3.845a2.883 2.883 0 0 0-4.077 0m1.288 11.462a.483.483 0 0 1 .9 0l.157.4a.48.48 0 0 0 .272.273l.398.157a.486.486 0 0 1 0 .903l-.398.158a.48.48 0 0 0-.272.273l-.157.4a.483.483 0 0 1-.9 0l-.157-.4a.48.48 0 0 0-.272-.273l-.398-.158a.486.486 0 0 1 0-.903l.398-.157a.48.48 0 0 0 .272-.274z" fill="#ffffff" opacity=".5"/><path d="M19.967 9.13a.483.483 0 0 1 .9 0l.156.399c.05.125.148.224.273.273l.398.158a.486.486 0 0 1 0 .902l-.398.158a.5.5 0 0 0-.273.273l-.156.4a.483.483 0 0 1-.9 0l-.157-.4a.5.5 0 0 0-.272-.273l-.398-.158a.486.486 0 0 1 0-.902l.398-.158a.5.5 0 0 0 .272-.273z" fill="#ffffff" opacity=".2"/><path d="M16.1 2.307a.483.483 0 0 1 .9 0l.43 1.095a.48.48 0 0 0 .272.274l1.091.432a.486.486 0 0 1 0 .903l-1.09.432a.5.5 0 0 0-.273.273L17 6.81a.483.483 0 0 1-.9 0l-.43-1.095a.5.5 0 0 0-.273-.273l-1.09-.432a.486.486 0 0 1 0-.903l1.09-.432a.5.5 0 0 0 .273-.274z" fill="#ffffff" opacity=".7"/><path d="M10.568 6.49c-.012.014-.555-.503-.568-.49l-4 4c-.013.013.504.556.49.568l9.588 9.587a2.883 2.883 0 1 0 4.078-4.077z" fill="#ffffff"/></svg></div><code>svg · wand-sparkles<i>hero CTA disc · white fills</i></code></figure>
+<figure class="ds-icon"><div class="stage-i "><svg class="w-[16px] h-[16px]" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px;"><path d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2s10 4.477 10 10" fill="#fb923c" opacity=".5"/><path d="M12 17.75a.75.75 0 0 0 .75-.75v-6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75M12 7a1 1 0 1 1 0 2a1 1 0 0 1 0-2" fill="#fb923c"/></svg></div><code>svg · info-circle<i>about badge · #fb923c</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg fill="currentColor" height="14" viewbox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2z" opacity=".5"/><path d="M1 1h22v22H1z" fill="none"/></svg></div><code>svg · status-info<i>phone status bar · 14px</i></code></figure>
+<figure class="ds-icon"><div class="stage-i "><svg class="text-orange-500" height="16" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z" fill="currentColor"/></svg></div><code>svg · star<i>app header mark · orange-500</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12.62 20.81c-.34.12-.9.12-1.24 0C8.48 19.82 2 15.69 2 8.69 2 5.6 4.49 3.1 7.56 3.1c1.82 0 3.43.88 4.44 2.24a5.53 5.53 0 0 1 4.44-2.24C19.51 3.1 22 5.6 22 8.69c0 7-6.48 11.13-9.38 12.12z" fill="currentColor" opacity="0.5"/><path d="M12.62 20.81c-.34.12-.9.12-1.24 0C8.48 19.82 2 15.69 2 8.69 2 5.6 4.49 3.1 7.56 3.1c1.82 0 3.43.88 4.44 2.24a5.53 5.53 0 0 1 4.44-2.24C19.51 3.1 22 5.6 22 8.69c0 7-6.48 11.13-9.38 12.12z" fill="currentColor" opacity="0.2"/></svg></div><code>svg · heart<i>app header / post actions · 24px</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5.025.45.79.196 1.75-.463 2.46A2.966 2.966 0 0 0 2.36 22H12z" fill="currentColor" opacity="0.5"/><path d="M16.5 13a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-4.5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-4.5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill="currentColor"/></svg></div><code>svg · chat<i>app header / post actions</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="text-white fill-current w-[24px] h-[24px]" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15.721 7.349a1.86 1.86 0 1 1-3.72 0a1.86 1.86 0 0 1 3.72 0" fill="#ffffff"/><path clip-rule="evenodd" d="M16.086 2.108C15.279 2 14.254 2 12.982 2h-1.963c-1.272 0-2.298 0-3.104.108c-.837.113-1.542.354-2.102.914s-.801 1.265-.914 2.102c-.108.806-.108 1.832-.108 3.104v7.544c0 1.272 0 2.298.108 3.104c.113.837.354 1.542.914 2.102s1.265.801 2.102.914C8.721 22 9.747 22 11.019 22h1.963c1.272 0 2.297 0 3.104-.108c.837-.113 1.542-.354 2.102-.914s.8-1.265.913-2.102c.109-.806.109-1.832.109-3.104V8.228c0-1.272 0-2.298-.109-3.104c-.112-.837-.353-1.542-.913-2.102s-1.265-.801-2.102-.914m.723 14.522l.986 1.04c.019-.536.02-1.175.02-1.95V8.28c0-1.336-.002-2.267-.097-2.97c-.091-.683-.26-1.044-.517-1.302c-.257-.257-.619-.425-1.301-.517c-.703-.094-1.634-.096-2.97-.096h-1.86c-1.335 0-2.266.002-2.97.096c-.682.092-1.043.26-1.3.517c-.258.258-.426.62-.518 1.302c-.094.703-.096 1.634-.096 2.97v4.624l.004-.003c.916-.941 2.335-.876 3.183.118l2.94 3.448c.236.276.546.289.783.093l.205-.169c1.076-.886 2.551-.77 3.508.24" fill="#ffffff" fill-rule="evenodd"/><path d="M5.016 4.5H5c-.465 0-.697 0-.891.03A2.5 2.5 0 0 0 2.03 6.61C2 6.803 2 7.035 2 7.5v9c0 .465 0 .697.03.891a2.5 2.5 0 0 0 2.08 2.079c.194.031.426.031.891.031h.016a6 6 0 0 1-.117-.624c-.108-.806-.108-1.832-.108-3.104V8.228c0-1.272 0-2.298.108-3.104q.043-.325.117-.624m13.968 15q.074-.299.116-.624c.109-.806.109-1.832.109-3.104V8.228c0-1.272 0-2.298-.109-3.104a6 6 0 0 0-.116-.624H19c.465 0 .697 0 .891.03a2.5 2.5 0 0 1 2.079 2.08c.031.194.031.426.031.891v9c0 .465 0 .697-.03.891a2.5 2.5 0 0 1-2.079 2.078c-.194.031-.426.031-.891.031z" fill="#ffffff" opacity=".5"/></svg></div><code>svg · story-gallery<i>story ring · white</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="fill-current w-[24px] h-[24px]" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M2 15.616c0 .847.682 1.529 2.045 2.892l1.447 1.447C6.855 21.318 7.537 22 8.384 22s1.53-.682 2.893-2.045l8.678-8.678C21.318 9.913 22 9.23 22 8.384s-.682-1.529-2.045-2.892l-1.447-1.447C17.145 2.682 16.463 2 15.616 2c-.754 0-1.376.54-2.464 1.618l-1.05 1.048l-1.072 1.073l-1.05 1.048L8.91 7.86L7.86 8.909L6.788 9.98L5.74 11.03l-1.073 1.073l-1.048 1.049C2.539 14.24 2 14.862 2 15.616" fill="#ffffff" opacity=".5"/><path d="M13.238 3.691a1 1 0 0 0-.086-.073l-1.049 1.048q.033.045.074.086l1.414 1.414a.75.75 0 0 0 1.06-1.06zm-2.122 2.122a1 1 0 0 0-.086-.074L9.982 6.787q.033.045.074.086l2.121 2.122a.75.75 0 0 0 1.06-1.061zM8.995 7.934a1 1 0 0 0-.086-.074L7.86 8.908q.033.046.074.087l1.415 1.414a.75.75 0 1 0 1.06-1.06zm-2.121 2.121a1 1 0 0 0-.086-.074L5.739 11.03q.033.045.074.086l2.121 2.121a.75.75 0 1 0 1.061-1.06zm-2.122 2.122a1 1 0 0 0-.086-.075l-1.048 1.05q.033.045.074.085l1.414 1.414a.75.75 0 1 0 1.06-1.06z" fill="#ffffff"/></svg></div><code>svg · story-ruler<i>story ring · white</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="fill-current w-[24px] h-[24px]" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M14 22h-4c-3.771 0-5.657 0-6.828-1.172S2 17.771 2 14v-4c0-3.771 0-5.657 1.172-6.828S6.239 2 10.03 2c.606 0 1.091 0 1.5.017q-.02.12-.02.244l-.01 2.834c0 1.097 0 2.067.105 2.848c.114.847.375 1.694 1.067 2.386c.69.69 1.538.952 2.385 1.066c.781.105 1.751.105 2.848.105h4.052c.043.534.043 1.19.043 2.063V14c0 3.771 0 5.657-1.172 6.828S17.771 22 14 22" fill="#ffffff" fill-rule="evenodd" opacity=".5"/><path d="M10.56 15.498a.75.75 0 1 0-1.12-.996l-2.107 2.37l-.772-.87a.75.75 0 0 0-1.122.996l1.334 1.5a.75.75 0 0 0 1.12 0zm.95-13.238l-.01 2.835c0 1.097 0 2.066.105 2.848c.114.847.375 1.694 1.067 2.385c.69.691 1.538.953 2.385 1.067c.781.105 1.751.105 2.848.105h4.052q.02.232.028.5H22c0-.268 0-.402-.01-.56a5.3 5.3 0 0 0-.958-2.641c-.094-.128-.158-.204-.285-.357C19.954 7.494 18.91 6.312 18 5.5c-.81-.724-1.921-1.515-2.89-2.161c-.832-.556-1.248-.834-1.819-1.04a6 6 0 0 0-.506-.154c-.384-.095-.758-.128-1.285-.14z" fill="#ffffff"/></svg></div><code>svg · story-doc-check<i>story ring · white</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="text-white" height="20" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="12" fill="currentColor" r="2"/><circle cx="12" cy="12" fill="currentColor" r="2"/><circle cx="19" cy="12" fill="currentColor" r="2"/></svg></div><code>svg · dots-horizontal<i>post header · 20px</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="text-white" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></div><code>svg · arrow-right<i>post CTA strip · stroke 2.5</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 5.523 4.477 10 10 10z" fill="currentColor" opacity="0.5"/><path d="M14.293 8.293a1 1 0 0 1 1.414 1.414l-2.293 2.293h3.586a1 1 0 1 1 0 2h-3.586l2.293 2.293a1 1 0 0 1-1.414 1.414l-4-4a1 1 0 0 1 0-1.414l4-4z" fill="currentColor"/></svg></div><code>svg · arrow-circle-left<i>post actions</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="text-white" fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-4.5L5 21z" fill="currentColor" opacity="0.5"/></svg></div><code>svg · bookmark<i>post actions</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="h-6 w-auto text-white opacity-80 group-hover:opacity-100 transition-opacity" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect fill="currentColor" fill-opacity="0.2" height="12" rx="2" width="20" x="2" y="6"/><path d="M2 10H22" stroke="currentColor" stroke-width="1.5"/><path d="M6 14H10" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"/></svg></div><code>svg · card<i>case row · h-6 opacity-80</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-neutral-600"><svg class="w-6 h-6 text-neutral-600 group-hover:text-white transition-colors" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.1" r="10"/><path d="M10 16L14 12L10 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg></div><code>svg · chevron-circle<i>case row · neutral-600 → hover white</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="h-5 w-auto text-white opacity-80 group-hover:opacity-100 transition-opacity" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L24 22H0L12 1Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.5"/></svg></div><code>svg · triangle<i>case row · h-5</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="h-6 w-auto text-white opacity-80 group-hover:opacity-100 transition-opacity" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L5 11H11L9 22L17 13H11L13 2Z" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-linejoin="round" stroke-width="1.5"/></svg></div><code>svg · bolt<i>case row · h-6</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="h-6 w-auto text-white" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" fill-opacity="0.2"/><path d="M8 8L16 16M16 8L8 16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg></div><code>svg · x-circle<i>expanded case row</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-white"><svg class="w-6 h-6 text-white" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.2" r="10"/><path d="M8 12H16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg></div><code>svg · minus-circle<i>expanded row toggle</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-orange-500"><svg fill="none" height="16" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.15" r="10"/><path d="M8 12C8 12.5523 7.55228 13 7 13C6.44772 13 6 12.5523 6 12C6 11.4477 6.44772 11 7 11C7.55228 11 8 11.4477 8 12Z" fill="currentColor"/><path d="M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12Z" fill="currentColor"/><path d="M18 12C18 12.5523 17.5523 13 17 13C16.4477 13 16 12.5523 16 12C16 11.4477 16.4477 11 17 11C17.5523 11 18 11.4477 18 12Z" fill="currentColor"/></svg></div><code>svg · dots-circle<i>footer contact chip · orange-500</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-neutral-600"><svg class="w-6 h-6 fill-current" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>X</title><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg></div><code>svg · x<i>social · neutral-600 → hover white</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-neutral-600"><svg class="w-6 h-6 fill-current" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.419-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></div><code>svg · github<i>social</i></code></figure>
+<figure class="ds-icon"><div class="stage-i text-neutral-600"><svg class="w-6 h-6 fill-current" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></div><code>svg · linkedin<i>social</i></code></figure>
+</div>
+<h3 class="ds-sub">Client logos</h3>
+<div class="ds-icons" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+<figure class="ds-icon"><div class="stage-i"><img src="assets/overview/assets/images/svg/logo-amp.svg" class="w-[256px] h-[32px] max-w-full" alt="Logotipo AMP"/></div><code>logo-amp.svg<i>256 × 32</i></code></figure>
+<figure class="ds-icon"><div class="stage-i"><img src="assets/overview/assets/images/svg/logo-adobe.svg" class="w-[256px] h-[32px] max-w-full" alt="Logotipo Adobe"/></div><code>logo-adobe.svg<i>256 × 32</i></code></figure>
+<figure class="ds-icon"><div class="stage-i"><img src="assets/overview/assets/images/svg/logo-100tb.svg" class="w-[256px] h-[32px] max-w-full" alt="Logotipo 100TB"/></div><code>logo-100tb.svg<i>256 × 32</i></code></figure>
+<figure class="ds-icon"><div class="stage-i"><img src="assets/overview/assets/images/svg/logo-active-campaign.svg" class="w-[256px] h-[32px] max-w-full" alt="Logotipo ActiveCampaign"/></div><code>logo-active-campaign.svg<i>256 × 32</i></code></figure>
+</div>
+<p class="ds-note">Shown at source size and colour, without the row's grayscale / opacity-60 filter (see Logo wall under Media). Quote sits on its orange card surface, where its black/40 stroke is visible.</p>
+</section>
+
+<!-- ============================================================ 06 motion -->
+<section class="ds-group" id="components-motion">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Foundations · 06</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Motion</h2>
+</div>
+<div class="ds-motion">
+<figure class="ds-surface">
+<div class="ds-stage" style="padding:0"><div class="flex w-full h-full"><div class="flex-1 border-l border-white/5 h-full relative overflow-hidden"><div class="absolute top-0 -left-[1px] w-[1px] h-64 bg-gradient-to-b from-transparent via-orange-500/60 to-transparent animate-beam-1"></div></div><div class="flex-1 border-l border-white/5 h-full relative overflow-hidden"><div class="absolute top-0 -left-[1px] w-[1px] h-96 bg-gradient-to-b from-transparent via-orange-500/80 to-transparent animate-beam-2"></div></div><div class="flex-1 border-l border-r border-white/5 h-full relative overflow-hidden"><div class="absolute top-0 -left-[1px] w-[1px] h-48 bg-gradient-to-b from-transparent via-orange-500/60 to-transparent animate-beam-3"></div></div></div></div>
+<div class="ds-cap"><strong>beam-fall</strong><code class="ds-meta">.animate-beam-1/2/3 · 6s / 8s / 7s linear infinite · delay 0 / 2s / 4s · translateY(-100% → 120vh), opacity 0 → .5 → 1 → .5 → 0</code></div>
+</figure>
+<figure class="ds-surface">
+<div class="ds-stage"><div id="ds-fade-demo" class="ds-hold inline-flex items-center gap-2 text-orange-500 [animation:fadeSlideIn_1s_cubic-bezier(0.2,0.8,0.2,1)_0.1s_both]"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Lorem Ipsum 2.0</span></div></div>
+<div class="ds-cap"><strong>fadeSlideIn</strong><code class="ds-meta">[animation:fadeSlideIn_1s_cubic-bezier(0.2,0.8,0.2,1)_Ns_both] · translateY(30px) blur(8px) opacity 0 → translateY(0) blur(0) opacity 1 · played by .animate-on-scroll → .animate (scroll-reveal.js, threshold .15)</code><button type="button" class="ds-replay" data-ds-replay="ds-fade-demo">Replay</button></div>
+</figure>
+<figure class="ds-surface">
+<div class="ds-stage"><div class="relative rounded-full overflow-hidden" style="width:200px;height:52px"><div class="absolute inset-0 overflow-hidden rounded-full"><div class="absolute inset-[-100%] w-[300%] h-[300%] left-[-100%] top-[-100%] animate-[spin_3s_linear_infinite]" style="background: conic-gradient(from 0deg, transparent 0deg, transparent 80deg, rgba(253,186,116,0.8) 180deg, transparent 280deg, transparent 360deg);"></div></div><div class="absolute inset-[1px] rounded-full backdrop-blur-xl z-0 bg-neutral-950/90"></div></div></div>
+<div class="ds-cap"><strong>Ring sweep</strong><code class="ds-meta">animate-[spin_3s_linear_infinite] · conic-gradient rgba(253,186,116,.8) at 180deg · under an inset-[1px] neutral-950/90 plate</code></div>
+</figure>
+<figure class="ds-surface">
+<div class="ds-stage"><button class="button-custom" type="button" style="transform:scale(1.4)"><div class="points_wrapper"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></div><span class="inner">Lorem Ipsum</span></button></div>
+<div class="ds-cap"><strong>floating-points</strong><code class="ds-meta">.points_wrapper .point · 2px white dots rise 55px · 1.9–2.5s ease-in-out infinite · 4 points in the page (7 styled) · shown at 1.4×</code></div>
+</figure>
+</div>
+<h3 class="ds-sub">Transitions</h3>
+<div class="ds-trans">
+<div><strong>Card stack</strong><code class="ds-meta">.card-stack-item · transform + opacity, z-index 0s</code><span>.6s cubic-bezier(.34,1.56,.64,1) · .5s ease</span></div>
+<div><strong>Step item</strong><code class="ds-meta">.step-item transition-all · badge / text transition-colors · icon opacity</code><span>300ms</span></div>
+<div><strong>Hero CTA</strong><code class="ds-meta">hover:scale-105 + glow · icon disc group-hover:scale-110 · arrow translate-x-0.5</code><span>300ms</span></div>
+<div><strong>Testimonial card</strong><code class="ds-meta">hover:-translate-y-1 · halo opacity .2 → .4 (duration-1000, hover 200)</code><span>300ms · 1000 / 200ms</span></div>
+<div><strong>Particle button</strong><code class="ds-meta">.button-custom all · ::before / ::after all ease-in-out</code><span>.25s ease · .5s</span></div>
+<div><strong>Phone mockup</strong><code class="ds-meta">rotate-[-2deg] → hover:rotate-0 · ease-out</code><span>700ms</span></div>
+<div><strong>Glass tiles</strong><code class="ds-meta">group-hover:rotate-6 / group-hover:-rotate-3</code><span>700ms</span></div>
+<div><strong>Contact link</strong><code class="ds-meta">text → bg-clip-text gradient · tag opacity 0 → 1, translate-x-2 → 0</code><span>500ms</span></div>
+<div><strong>Logo wall</strong><code class="ds-meta">grayscale → grayscale-0 on hover</code><span>500ms</span></div>
+<div><strong>Status dots</strong><code class="ds-meta">animate-pulse (green-400, orange-500)</code><span>2s cubic-bezier(.4,0,.6,1) infinite</span></div>
+</div>
+</section>
+
+<!-- ============================================================ 07 actions -->
+<section class="ds-group" id="components-actions">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Components · 07</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Actions</h2>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Glow CTA pill</h3>
+<div class="ds-stage">
+<div class="mt-10 flex flex-wrap gap-6 items-center">
+<a class="group isolate inline-flex cursor-pointer overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_10px_rgba(249,115,22,0.45)] bg-gradient-to-b from-white/20 via-white/0 to-white/5 rounded-full relative shadow-[0_0_25px_rgba(249,115,22,0.3),0_8px_40px_rgba(249,115,22,0.15)]" href="#">
+<div class="absolute inset-0 overflow-hidden rounded-full">
+<div class="absolute inset-[-100%] w-[300%] h-[300%] left-[-100%] top-[-100%] animate-[spin_3s_linear_infinite]" style="background: conic-gradient(from 0deg, transparent 0deg, transparent 80deg, rgba(253,186,116,0.8) 180deg, transparent 280deg, transparent 360deg);"></div>
+</div>
+<div class="absolute inset-[1px] rounded-full backdrop-blur-xl z-0 bg-neutral-950/90"></div>
+<div class="z-10 flex gap-3 sm:w-auto overflow-hidden text-sm font-medium text-white w-full rounded-full pt-3 pr-5 pb-3 pl-4 relative items-center">
+<div class="relative z-20 w-7 h-7 rounded-full bg-gradient-to-b from-orange-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30 ring-1 ring-white/20 group-hover:scale-110 transition-transform duration-300">
+<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px;"><path d="M3.845 3.845a2.883 2.883 0 0 0 0 4.077L5.432 9.51c.012-.014.555.503.568.49l4-4c.013-.013-.504-.556-.49-.568L7.922 3.845a2.883 2.883 0 0 0-4.077 0m1.288 11.462a.483.483 0 0 1 .9 0l.157.4a.48.48 0 0 0 .272.273l.398.157a.486.486 0 0 1 0 .903l-.398.158a.48.48 0 0 0-.272.273l-.157.4a.483.483 0 0 1-.9 0l-.157-.4a.48.48 0 0 0-.272-.273l-.398-.158a.486.486 0 0 1 0-.903l.398-.157a.48.48 0 0 0 .272-.274z" fill="#ffffff" opacity=".5"/><path d="M19.967 9.13a.483.483 0 0 1 .9 0l.156.399c.05.125.148.224.273.273l.398.158a.486.486 0 0 1 0 .902l-.398.158a.5.5 0 0 0-.273.273l-.156.4a.483.483 0 0 1-.9 0l-.157-.4a.5.5 0 0 0-.272-.273l-.398-.158a.486.486 0 0 1 0-.902l.398-.158a.5.5 0 0 0 .272-.273z" fill="#ffffff" opacity=".2"/><path d="M16.1 2.307a.483.483 0 0 1 .9 0l.43 1.095a.48.48 0 0 0 .272.274l1.091.432a.486.486 0 0 1 0 .903l-1.09.432a.5.5 0 0 0-.273.273L17 6.81a.483.483 0 0 1-.9 0l-.43-1.095a.5.5 0 0 0-.273-.273l-1.09-.432a.486.486 0 0 1 0-.903l1.09-.432a.5.5 0 0 0 .273-.274z" fill="#ffffff" opacity=".7"/><path d="M10.568 6.49c-.012.014-.555-.503-.568-.49l-4 4c-.013.013.504.556.49.568l9.588 9.587a2.883 2.883 0 1 0 4.078-4.077z" fill="#ffffff"/></svg>
+</div>
+<span class="whitespace-nowrap relative z-10 font-medium tracking-tight text-base text-white/95 group-hover:text-white transition-colors">Lorem Ipsum</span>
+<span class="inline-flex items-center justify-center z-10 bg-white/10 w-6 h-6 rounded-full ml-1 relative group-hover:translate-x-0.5 transition-transform text-white/80 group-hover:text-white">
+<i data-lucide="arrow-right" class="w-3 h-3"></i>
+</span>
+</div>
+</a>
+<div class="flex items-center gap-2 text-xs font-medium text-neutral-500">
+<i data-lucide="check" class="w-3.5 h-3.5 text-orange-500"></i>
+<span>Lorem ipsum dolor sit amet</span>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>a.group.isolate.rounded-full</b> · conic ring animate-[spin_3s_linear_infinite] under an <b>inset-[1px] bg-neutral-950/90 backdrop-blur-xl</b> plate · icon disc from-orange-400 to-orange-600 ring-white/20 · arrow chip bg-white/10 · hover: scale-105 + shadow 0 0 50px 10px rgba(249,115,22,.45) · with the check note (text-xs neutral-500)</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Particle button</h3>
+<div class="ds-row">
+<div class="ds-cell"><button class="button-custom scale-95" type="button"><div class="points_wrapper"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></div><span class="inner">Lorem Ipsum</span></button><small>Navbar · scale-95</small></div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>.button-custom</b> (components.css) · radial rgba(251,191,36,.8) on #ea580c · ::before top-lit gloss · min-height 44px · padding 10px 24px · <b>.points_wrapper .point</b> floating-points · <b>.inner</b> 0.875rem 500 white</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Glass play button</h3>
+<div class="relative w-64 md:w-72 aspect-video rounded-lg overflow-hidden border border-white/10 shadow-2xl bg-neutral-900">
+<img alt="" class="w-full h-full object-cover opacity-90" src="assets/overview/assets/2b5079f4-4ddd-433b-a936-fc8f7d_8dea34ffc1ee.webp"/>
+<div class="flex absolute top-0 right-0 bottom-0 left-0 items-center justify-center">
+<div class="flex transition-transform hover:scale-110 bg-gradient-to-br from-white/10 via-white/0 to-white/10 w-12 h-12 rounded-full shadow-2xl backdrop-blur-md items-center justify-center border border-white/20">
+<i data-lucide="play" class="w-4 h-4 fill-white text-white ml-1"></i>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>w-12 h-12 rounded-full</b> bg-gradient-to-br from-white/10 via-white/0 to-white/10 · border-white/20 · backdrop-blur-md shadow-2xl · lucide play fill-white · hover:scale-110 · on the front media card</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Text links</h3>
+<div class="ds-stage">
+<div class="ds-row">
+<div class="ds-cell"><div class="flex items-center gap-8">
+<a class="text-xs font-medium tracking-widest uppercase hover:text-white transition-colors text-neutral-400" href="#">Fluxo</a>
+<a class="text-xs font-medium tracking-widest uppercase hover:text-white transition-colors text-neutral-400" href="#">Recursos</a>
+<a class="text-xs font-medium tracking-widest uppercase hover:text-white transition-colors text-neutral-400" href="#">Preços</a>
+</div><small>Nav link</small></div>
+<div class="ds-cell"><a class="text-sm font-medium hover:text-white transition-colors text-neutral-400" href="#">Entrar</a><small>Sign-in link</small></div>
+<div class="ds-cell">
+<div class="flex flex-wrap gap-8 md:gap-12 text-xs font-semibold tracking-widest uppercase text-neutral-500">
+<a class="hover:text-white transition-colors duration-300" href="#">Privacidade &amp; Política</a>
+<a class="hover:text-white transition-colors duration-300" href="#">Termos de Serviço</a>
+<span class="text-neutral-700">@2025 Lumina Creative Inc.</span>
+</div>
+<small>Legal links + copyright</small></div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>nav a</b> text-xs 500 uppercase tracking-widest neutral-400 · <b>sign-in</b> text-sm 500 neutral-400 · <b>legal</b> text-xs 600 uppercase tracking-widest neutral-500, copyright neutral-700 · all hover:text-white</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Display contact link</h3>
+<div class="ds-stage">
+<div class="group/item relative flex flex-col items-start w-fit">
+<a class="relative z-10 text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter text-white group-hover/item:text-transparent group-hover/item:bg-clip-text group-hover/item:bg-gradient-to-r group-hover/item:from-white group-hover/item:to-neutral-500 transition-all duration-500" href="tel:+18005550199">+1 800 555 0199</a>
+<div class="absolute -right-8 top-4 opacity-0 group-hover/item:opacity-100 transition-opacity duration-500 translate-x-2 group-hover/item:translate-x-0">
+<span class="flex items-center justify-center w-5 h-5 rounded bg-orange-500 text-[9px] font-bold text-black uppercase tracking-wider shadow-[0_0_15px_rgba(249,115,22,0.6)]">T</span>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>.group/item</b> a text-5xl md:text-7xl lg:text-8xl 500 tracking-tighter · hover: text-transparent bg-clip-text from-white to-neutral-500 (500ms) · letter tag <b>w-5 h-5 rounded bg-orange-500</b> glow rgba(249,115,22,.6) fades in at -right-8 · tel: / mailto:</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Social icon links</h3>
+<div class="ds-stage">
+<div class="flex items-center gap-8 mt-12 pl-1">
+<a class="text-neutral-600 hover:text-white transition-colors duration-300 transform hover:scale-110" href="#">
+<svg class="w-6 h-6 fill-current" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>X</title><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+</a>
+<a class="text-neutral-600 hover:text-white transition-colors duration-300 transform hover:scale-110" href="#">
+<svg class="w-6 h-6 fill-current" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.419-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a>
+<a class="text-neutral-600 hover:text-white transition-colors duration-300 transform hover:scale-110" href="#">
+<svg class="w-6 h-6 fill-current" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+</a>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>a.text-neutral-600</b> · svg w-6 h-6 fill-current (X, GitHub, LinkedIn) · hover:text-white hover:scale-110 · gap-8</code></div>
+</div>
+</section>
+
+<!-- ============================================================ 08 navigation -->
+<section class="ds-group" id="components-navigation">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Components · 08</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Navigation</h2>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Navbar</h3>
+<div class="ds-navstage">
+<nav class="flex justify-between items-center py-8 px-6 md:px-10">
+<div class="flex items-center gap-3 group cursor-pointer">
+<div class="flex bg-gradient-to-tr from-orange-500 to-amber-500 w-8 h-8 rounded-full items-center justify-center" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0)); --border-radius-before: 9999px;">
+<div class="w-2.5 h-2.5 bg-black rounded-full" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0)); --border-radius-before: 9999px"></div>
+</div>
+<span class="text-lg font-semibold tracking-tight text-white">Lumina</span>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-xs font-medium tracking-widest uppercase hover:text-white transition-colors text-neutral-400" href="#">Fluxo</a>
+<a class="text-xs font-medium tracking-widest uppercase hover:text-white transition-colors text-neutral-400" href="#">Recursos</a>
+<a class="text-xs font-medium tracking-widest uppercase hover:text-white transition-colors text-neutral-400" href="#">Preços</a>
+</div>
+<div class="flex items-center gap-6">
+<a class="text-sm font-medium hover:text-white transition-colors text-neutral-400" href="#">Entrar</a>
+<button class="button-custom scale-95" type="button">
+<div class="points_wrapper">
+<i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i>
+</div>
+<span class="inner">Lorem Ipsum</span>
+</button>
+</div>
+</nav>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>nav</b> flex justify-between py-8 px-6 md:px-10 · logo disc <b>from-orange-500 to-amber-500</b> with --border-gradient rgba(255,255,255,.5) + black core · link row <b>hidden md:flex</b> gap-8 · sign-in + <b>.button-custom scale-95</b> · in-flow (scrolls with the page) · enters with fadeSlideIn 0.1s</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Step list with media stack</h3>
+<div class="ds-stage">
+<div class="flex flex-col items-center">
+<div class="relative mb-12 mr-4 w-64 md:w-72 aspect-video group perspective-1000">
+<div class="absolute -inset-8 bg-orange-500/20 blur-3xl -z-10 opacity-50 group-hover:opacity-70 transition-opacity duration-700"></div>
+<div class="relative w-full h-full">
+<div class="card-stack-item absolute inset-0 rounded-lg overflow-hidden border border-white/10 shadow-2xl origin-bottom bg-neutral-900" id="card-3" style="transform: translateY(24px) scale(0.9); z-index: 10; opacity: 0.4;">
+<img alt="Exportar" class="w-full h-full object-cover opacity-60" src="assets/overview/assets/c3337c33-82ae-4ad6-9c83-f9f1a5_1ba1c854e7ba.webp"/>
+<div class="absolute inset-0 bg-black/40"></div>
+<div class="absolute top-3 right-3 px-2 py-1 bg-orange-500 text-black text-[10px] font-bold rounded uppercase">Pronto em 4K</div>
+</div>
+<div class="card-stack-item absolute inset-0 rounded-lg overflow-hidden border border-white/10 shadow-2xl origin-bottom bg-neutral-900" id="card-2" style="transform: translateY(12px) scale(0.95); z-index: 20; opacity: 0.6;">
+<img alt="Processamento por IA" class="w-full h-full object-cover opacity-70" src="assets/overview/assets/6e8af32c-e155-4b33-9e0a-eb91a9_c1c7ef5e7858.webp"/>
+<div class="absolute inset-0 bg-black/20"></div>
+<div class="absolute bottom-3 left-3 flex items-center gap-2">
+<div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+<span class="text-[10px] font-mono text-white/80">Analisando...</span>
+</div>
+</div>
+<div class="card-stack-item absolute inset-0 rounded-lg overflow-hidden border border-white/10 shadow-2xl origin-bottom bg-neutral-900" id="card-1" style="transform: translateY(0px) scale(1); z-index: 30; opacity: 1;">
+<img alt="Importar" class="w-full h-full object-cover opacity-90" src="assets/overview/assets/2b5079f4-4ddd-433b-a936-fc8f7d_8dea34ffc1ee.webp"/>
+<div class="flex absolute top-0 right-0 bottom-0 left-0 items-center justify-center">
+<div class="flex transition-transform hover:scale-110 bg-gradient-to-br from-white/10 via-white/0 to-white/10 w-12 h-12 rounded-full shadow-2xl backdrop-blur-md items-center justify-center border border-white/20">
+<i data-lucide="play" class="w-4 h-4 fill-white text-white ml-1"></i>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3 w-full max-w-xs mr-0 lg:mr-8">
+<div class="step-item flex cursor-pointer transition-all duration-300 bg-white/5 rounded-lg pt-2 pr-2 pb-2 pl-2 shadow-xl backdrop-blur-md translate-x-[-10px] gap-x-4 gap-y-4 items-center" id="step-1" onclick="activateStep(1)" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 8px">
+<div class="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-[10px] font-bold text-black shadow-lg shadow-orange-500/20 transition-colors duration-300" id="badge-1">01</div>
+<span class="text-sm font-medium text-white transition-colors duration-300" id="text-1">Lorem Ipsum</span>
+<i data-lucide="video" class="w-3 h-3 ml-auto transition-all duration-300 text-orange-500 opacity-100" id="icon-1"></i>
+</div>
+<div class="step-item flex gap-4 hover:bg-white/5 transition-all duration-300 cursor-pointer group rounded-lg pt-2 pr-2 pb-2 pl-2 gap-x-4 gap-y-4 items-center" id="step-2" onclick="activateStep(2)" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 8px">
+<div class="w-6 h-6 rounded-full bg-transparent flex items-center justify-center text-[10px] font-bold group-hover:text-orange-400 transition-colors duration-300 text-neutral-500" id="badge-2">02</div>
+<span class="text-sm font-medium group-hover:text-white transition-colors duration-300 text-neutral-400" id="text-2">Dolor Sit Amet Elit</span>
+<i data-lucide="scan-line" class="w-3 h-3 ml-auto transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:text-white text-neutral-600" id="icon-2"></i>
+</div>
+<div class="step-item flex hover:bg-white/5 transition-all duration-300 cursor-pointer group rounded-lg pt-2 pr-2 pb-2 pl-2 gap-x-4 gap-y-4 items-center" id="step-3" onclick="activateStep(3)" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 8px">
+<div class="w-6 h-6 rounded-full bg-transparent flex items-center justify-center text-[10px] font-bold group-hover:text-orange-400 transition-colors duration-300 text-neutral-500" id="badge-3">03</div>
+<span class="text-sm font-medium group-hover:text-white transition-colors duration-300 text-neutral-400" id="text-3">Consectetur Elit</span>
+<i data-lucide="download" class="w-3 h-3 ml-auto transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:text-white text-neutral-600" id="icon-3"></i>
+</div>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>.step-item</b> onclick="activateStep(n)" (interactions.js) swaps step classes and re-orders <b>#card-1…3</b>: front translateY(0) scale(1) opacity 1 z30 · middle 12px .95 .6 z20 · back 24px .9 .4 z10 · spring .6s cubic-bezier(.34,1.56,.64,1) · active step: badge bg-orange-500, video icon orange-500, translate-x-[-10px] · click a step to drive the stack</code></div>
+</div>
+</section>
+
+<!-- ============================================================ 09 cards -->
+<section class="ds-group" id="components-cards">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Components · 09</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Cards</h2>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Testimonial card</h3>
+<div class="ds-w-sm">
+<div class="col-span-1 lg:col-span-4 relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-orange-600 to-amber-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+<div class="flex flex-col min-h-[180px] transition-transform hover:-translate-y-1 duration-300 text-black bg-gradient-to-b from-orange-400 to-orange-600 rounded-xl pt-8 pr-8 pb-8 pl-8 relative shadow-2xl justify-between" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0)); --border-radius-before: 12px">
+<div class="flex justify-between items-start mb-4">
+<div class="flex -space-x-2">
+<img alt="Usuário" class="w-8 h-8 rounded-full border-2 border-orange-400" src="assets/overview/assets/100_70a8a1879e69.jpg"/>
+<img alt="Usuário" class="w-8 h-8 rounded-full border-2 border-orange-400" src="assets/overview/assets/100_790196813bec.jpg"/>
+<div class="w-8 h-8 rounded-full border-2 border-orange-400 bg-black text-white flex items-center justify-center text-[10px] font-bold">+2k</div>
+</div>
+<i data-lucide="quote" class="w-5 h-5 text-black/40 fill-black/20"></i>
+</div>
+<div>
+<p class="text-lg font-semibold leading-snug tracking-tight max-w-[80%]">"Lorem ipsum dolor sit amet consectetur elit."</p>
+<div class="mt-4 pt-4 border-t border-black/10 flex items-center gap-2 text-xs font-medium uppercase tracking-wide opacity-70">
+<span>Lorem Ipsum</span>
+<span class="w-1 h-1 bg-black rounded-full"></span>
+<span>Dolor 5.0</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>bg-gradient-to-b from-orange-400 to-orange-600 rounded-xl p-8</b> min-h-[180px] text-black shadow-2xl · --border-gradient rgba(255,255,255,.3) · halo -inset-1 from-orange-600 to-amber-600 blur opacity-20 → hover 40 · hover:-translate-y-1 · avatar stack + lucide quote black/40 · quote text-lg 600 · meta row border-t black/10 text-xs uppercase opacity-70</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Media card</h3>
+<div class="ds-row ds-top">
+<div class="ds-cell"><div class="relative w-64 md:w-72 aspect-video">
+<div class="card-stack-item absolute inset-0 rounded-lg overflow-hidden border border-white/10 shadow-2xl origin-bottom bg-neutral-900">
+<img alt="Importar" class="w-full h-full object-cover opacity-90" src="assets/overview/assets/2b5079f4-4ddd-433b-a936-fc8f7d_8dea34ffc1ee.webp"/>
+<div class="flex absolute top-0 right-0 bottom-0 left-0 items-center justify-center">
+<div class="flex transition-transform hover:scale-110 bg-gradient-to-br from-white/10 via-white/0 to-white/10 w-12 h-12 rounded-full shadow-2xl backdrop-blur-md items-center justify-center border border-white/20">
+<i data-lucide="play" class="w-4 h-4 fill-white text-white ml-1"></i>
+</div>
+</div>
+</div>
+</div><small>Import · play</small></div>
+<div class="ds-cell"><div class="relative w-64 md:w-72 aspect-video">
+<div class="card-stack-item absolute inset-0 rounded-lg overflow-hidden border border-white/10 shadow-2xl origin-bottom bg-neutral-900">
+<img alt="Processamento por IA" class="w-full h-full object-cover opacity-70" src="assets/overview/assets/6e8af32c-e155-4b33-9e0a-eb91a9_c1c7ef5e7858.webp"/>
+<div class="absolute inset-0 bg-black/20"></div>
+<div class="absolute bottom-3 left-3 flex items-center gap-2">
+<div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+<span class="text-[10px] font-mono text-white/80">Analisando...</span>
+</div>
+</div>
+</div><small>Processing</small></div>
+<div class="ds-cell"><div class="relative w-64 md:w-72 aspect-video">
+<div class="card-stack-item absolute inset-0 rounded-lg overflow-hidden border border-white/10 shadow-2xl origin-bottom bg-neutral-900">
+<img alt="Exportar" class="w-full h-full object-cover opacity-60" src="assets/overview/assets/c3337c33-82ae-4ad6-9c83-f9f1a5_1ba1c854e7ba.webp"/>
+<div class="absolute inset-0 bg-black/40"></div>
+<div class="absolute top-3 right-3 px-2 py-1 bg-orange-500 text-black text-[10px] font-bold rounded uppercase">Pronto em 4K</div>
+</div>
+</div><small>Ready · 4K</small></div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>.card-stack-item</b> rounded-lg border-white/10 shadow-2xl bg-neutral-900 aspect-video (w-64 md:w-72) · image opacity .9 / .7 / .6 with bg-black/20 · /40 dims · glass play button · green-400 pulse status · orange-500 badge · stacked in the Step list (Navigation)</code></div>
+</div>
+</section>
+
+<!-- ============================================================ 10 data display -->
+<section class="ds-group" id="components-data">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Components · 10</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Data display</h2>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Stats grid</h3>
+<div class="ds-stage" style="padding-top:0">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-y-12 gap-x-8 mt-24 pt-12 border-t border-white/5">
+<div class="flex flex-col gap-2">
+<div class="md:text-7xl lg:text-8xl leading-none text-6xl font-light text-white tracking-tighter">US$ 500M</div>
+<div class="text-xl font-medium pl-1 text-neutral-500">Lorem Ipsum Dolor</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="md:text-7xl lg:text-8xl leading-none text-6xl font-light text-white tracking-tighter">99%</div>
+<div class="text-xl font-medium pl-1 text-neutral-500">Sit Amet Consectetur</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="md:text-7xl lg:text-8xl leading-none text-6xl font-light text-white tracking-tighter">2M+</div>
+<div class="text-xl font-medium pl-1 text-neutral-500">Adipiscing Elit</div>
+</div>
+<div class="flex flex-col gap-2">
+<div class="md:text-7xl lg:text-8xl leading-none text-6xl font-light text-white tracking-tighter">4.9</div>
+<div class="text-xl font-medium pl-1 text-neutral-500">Sed Eiusmod</div>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>grid grid-cols-2 md:grid-cols-4</b> gap-y-12 gap-x-8 mt-24 pt-12 border-t border-white/5 · value text-6xl md:text-7xl lg:text-8xl <b>font-light</b> tracking-tighter · label text-xl 500 neutral-500 pl-1</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Stat list</h3>
+<div class="ds-stage ds-w-md">
+<div class="flex flex-col justify-center gap-2 pl-0 lg:pl-12">
+<div class="flex flex-col gap-2 pb-8 border-b border-white/5">
+<div class="text-5xl md:text-6xl font-medium text-white tracking-tight">10+</div>
+<div class="text-lg text-neutral-500 font-medium">Lorem Ipsum Dolor</div>
+</div>
+<div class="flex flex-col gap-2 py-8 border-b border-white/5">
+<div class="text-5xl md:text-6xl font-medium text-white tracking-tight">500 Milhões</div>
+<div class="text-lg text-neutral-500 font-medium">Sit Amet Consectetur Elit</div>
+</div>
+<div class="flex flex-col gap-2 py-8 border-b border-white/5">
+<div class="text-5xl md:text-6xl font-medium text-white tracking-tight">1.800%</div>
+<div class="text-lg text-neutral-500 font-medium">Adipiscing Elit Sed Do Eiusmod</div>
+</div>
+<div class="flex flex-col gap-2 pt-8">
+<div class="text-5xl md:text-6xl font-medium text-white tracking-tight">140.000</div>
+<div class="text-lg text-neutral-500 font-medium">Tempor Incididunt Ut</div>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>flex flex-col</b> · rows py-8 border-b border-white/5 (first pb-8, last pt-8, no rule) · value text-5xl md:text-6xl 500 tracking-tight · label text-lg 500 neutral-500</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Avatar stack</h3>
+<div class="ds-row">
+<div class="ds-cell"><div class="bg-gradient-to-b from-orange-400 to-orange-600 rounded-xl" style="padding:20px 24px">
+<div class="flex -space-x-2">
+<img alt="Usuário" class="w-8 h-8 rounded-full border-2 border-orange-400" src="assets/overview/assets/100_70a8a1879e69.jpg"/>
+<img alt="Usuário" class="w-8 h-8 rounded-full border-2 border-orange-400" src="assets/overview/assets/100_790196813bec.jpg"/>
+<div class="w-8 h-8 rounded-full border-2 border-orange-400 bg-black text-white flex items-center justify-center text-[10px] font-bold">+2k</div>
+</div>
+</div><small>On the orange card</small></div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>flex -space-x-2</b> · img w-8 h-8 rounded-full border-2 border-orange-400 · counter bg-black text-white text-[10px] 700 “+2k”</code></div>
+</div>
+</section>
+
+<!-- ============================================================ 11 badges and status -->
+<section class="ds-group" id="components-badges">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Components · 11</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Badges and status</h2>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Eyebrows</h3>
+<div class="ds-stage">
+<div class="ds-row ds-top">
+<div class="ds-cell">
+<div class="inline-flex items-center gap-2 text-orange-500 mb-8">
+<span class="flex h-2 w-2 rounded-full bg-orange-500"></span>
+<span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Lorem Ipsum 2.0</span>
+</div>
+<small>Dot · hero</small></div>
+<div class="ds-cell">
+<div class="flex items-center gap-2 lg:justify-start justify-end mb-3 text-orange-400 text-xs font-medium uppercase tracking-wider">
+<i data-lucide="sparkles" class="w-3 h-3"></i>
+<span>Lorem 2.0 Ipsum</span>
+</div>
+<small>Icon · headline</small></div>
+<div class="ds-cell">
+<div class="flex items-center gap-2 text-sm font-medium text-neutral-500 mb-1">
+<span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+<span class="uppercase tracking-widest text-xs">Lorem Ipsum</span>
+</div>
+<small>Muted dot · section</small></div>
+<div class="ds-cell">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+<svg fill="none" height="16" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.15" r="10"/><path d="M8 12C8 12.5523 7.55228 13 7 13C6.44772 13 6 12.5523 6 12C6 11.4477 6.44772 11 7 11C7.55228 11 8 11.4477 8 12Z" fill="currentColor"/><path d="M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12Z" fill="currentColor"/><path d="M18 12C18 12.5523 17.5523 13 17 13C16.4477 13 16 12.5523 16 12C16 11.4477 16.4477 11 17 11C17.5523 11 18 11.4477 18 12Z" fill="currentColor"/></svg>
+</div>
+<span class="text-xs font-bold tracking-[0.2em] uppercase text-neutral-400">Lorem Ipsum</span>
+</div>
+<small>Icon chip · footer</small></div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>dot</b> h-2 w-2 bg-orange-500 + text-xs 700 tracking-widest uppercase orange-500/80 · <b>icon</b> lucide sparkles w-3 h-3, text-xs 500 uppercase tracking-wider orange-400 · <b>muted</b> w-1.5 dot + text-xs tracking-widest neutral-500 · <b>chip</b> w-8 glass circle + text-xs 700 tracking-[0.2em] neutral-400</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Glass pill badge</h3>
+<div class="ds-stage">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-orange-400 text-sm font-medium tracking-wide uppercase hover:bg-white/10 transition-colors cursor-default">
+<svg class="w-[16px] h-[16px]" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:16px;height:16px;"><path d="M22 12c0 5.523-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2s10 4.477 10 10" fill="#fb923c" opacity=".5"/><path d="M12 17.75a.75.75 0 0 0 .75-.75v-6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75M12 7a1 1 0 1 1 0 2a1 1 0 0 1 0-2" fill="#fb923c"/></svg>
+<span>Lorem Ipsum</span>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>inline-flex rounded-full px-4 py-1.5</b> bg-white/5 border-white/10 backdrop-blur-sm · info-circle #fb923c 16px · text-sm 500 uppercase tracking-wide orange-400 · hover:bg-white/10 · cursor-default</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Status and tags</h3>
+<div class="ds-stage">
+<div class="ds-row">
+<div class="ds-cell"><div class="ds-flowbox">
+<div class="absolute top-3 right-3 px-2 py-1 bg-orange-500 text-black text-[10px] font-bold rounded uppercase">Pronto em 4K</div>
+</div><small>Solid badge</small></div>
+<div class="ds-cell"><div class="ds-flowbox">
+<div class="absolute bottom-3 left-3 flex items-center gap-2">
+<div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+<span class="text-[10px] font-mono text-white/80">Analisando...</span>
+</div>
+</div><small>Live status</small></div>
+<div class="ds-cell"><div class="relative w-56 h-28 overflow-hidden rounded-lg bg-[#111]"><div class="bg-center bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/b02f3053-26c7-4f46-a379-f073cacac0f0_800w.webp)] bg-cover absolute top-0 right-0 bottom-0 left-0"></div>
+<div class="absolute bottom-4 left-4 px-3 py-1 bg-black/60 backdrop-blur border border-white/10 rounded-full flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>
+<span class="text-[10px] font-medium text-white">Gerado por IA</span>
+</div>
+</div><small>Media pill</small></div>
+<div class="ds-cell"><span class="flex items-center justify-center w-5 h-5 rounded bg-orange-500 text-[9px] font-bold text-black uppercase tracking-wider shadow-[0_0_15px_rgba(249,115,22,0.6)]">T</span><small>Key tag</small></div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>solid</b> px-2 py-1 bg-orange-500 text-black text-[10px] 700 rounded uppercase · <b>live</b> w-2 h-2 green-400 animate-pulse + text-[10px] mono white/80 · <b>media pill</b> px-3 py-1 bg-black/60 backdrop-blur border-white/10 rounded-full, orange-500 pulse dot · <b>key tag</b> w-5 h-5 rounded bg-orange-500 glow rgba(249,115,22,.6)</code></div>
+</div>
+</section>
+
+<!-- ============================================================ 12 media -->
+<section class="ds-group" id="components-media">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Components · 12</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Media</h2>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Phone feed mockup</h3>
+<div class="ds-stage ds-phone-stage">
+<div class="relative flex justify-center group perspective-1000">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[80%] bg-orange-500/20 blur-[120px] -z-10 rounded-full opacity-40 pointer-events-none"></div>
+<div class="relative w-[340px] h-[680px] bg-[#0a0a0a] border-[6px] border-[#1a1a1a] rounded-[3rem] shadow-2xl overflow-hidden rotate-[-2deg] hover:rotate-0 transition-transform duration-700 ease-out">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-2xl z-50 flex justify-center items-center"></div>
+<!-- status-bar -->
+<div class="flex justify-between items-center px-6 pt-4 pb-2 text-white text-xs font-medium relative z-40">
+<span>9:41</span>
+<div class="flex gap-1.5 items-center">
+<svg fill="currentColor" height="14" viewbox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm0-8h-2V7h2v2z" opacity=".5"/><path d="M1 1h22v22H1z" fill="none"/></svg>
+<div class="w-5 h-3 border border-white/30 rounded-[3px] relative">
+<div class="absolute top-0.5 left-0.5 bottom-0.5 right-1 bg-white rounded-[1px]"></div>
+</div>
+</div>
+</div>
+<!-- app-header -->
+<div class="flex justify-between items-center px-5 py-3 border-b border-white/5 bg-[#0a0a0a]/90 backdrop-blur-md sticky top-0 z-30">
+<div class="flex items-center gap-1">
+<span class="font-instrument-serif font-bold text-xl tracking-tight text-white">Lumina</span>
+<svg class="text-orange-500" height="16" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z" fill="currentColor"/></svg>
+</div>
+<div class="flex gap-4 text-white">
+<svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12.62 20.81c-.34.12-.9.12-1.24 0C8.48 19.82 2 15.69 2 8.69 2 5.6 4.49 3.1 7.56 3.1c1.82 0 3.43.88 4.44 2.24a5.53 5.53 0 0 1 4.44-2.24C19.51 3.1 22 5.6 22 8.69c0 7-6.48 11.13-9.38 12.12z" fill="currentColor" opacity="0.5"/><path d="M12.62 20.81c-.34.12-.9.12-1.24 0C8.48 19.82 2 15.69 2 8.69 2 5.6 4.49 3.1 7.56 3.1c1.82 0 3.43.88 4.44 2.24a5.53 5.53 0 0 1 4.44-2.24C19.51 3.1 22 5.6 22 8.69c0 7-6.48 11.13-9.38 12.12z" fill="currentColor" opacity="0.2"/></svg>
+<svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5.025.45.79.196 1.75-.463 2.46A2.966 2.966 0 0 0 2.36 22H12z" fill="currentColor" opacity="0.5"/><path d="M16.5 13a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-4.5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-4.5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill="currentColor"/></svg>
+</div>
+</div>
+<!-- stories -->
+<div class="flex gap-4 px-5 py-4 overflow-x-hidden border-b border-white/5">
+<div class="flex flex-col items-center gap-1.5">
+<div class="w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-orange-400 to-pink-600">
+<div class="w-full h-full rounded-full bg-black flex items-center justify-center border-2 border-black">
+<svg class="text-white fill-current w-[24px] h-[24px]" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M15.721 7.349a1.86 1.86 0 1 1-3.72 0a1.86 1.86 0 0 1 3.72 0" fill="#ffffff"/><path clip-rule="evenodd" d="M16.086 2.108C15.279 2 14.254 2 12.982 2h-1.963c-1.272 0-2.298 0-3.104.108c-.837.113-1.542.354-2.102.914s-.801 1.265-.914 2.102c-.108.806-.108 1.832-.108 3.104v7.544c0 1.272 0 2.298.108 3.104c.113.837.354 1.542.914 2.102s1.265.801 2.102.914C8.721 22 9.747 22 11.019 22h1.963c1.272 0 2.297 0 3.104-.108c.837-.113 1.542-.354 2.102-.914s.8-1.265.913-2.102c.109-.806.109-1.832.109-3.104V8.228c0-1.272 0-2.298-.109-3.104c-.112-.837-.353-1.542-.913-2.102s-1.265-.801-2.102-.914m.723 14.522l.986 1.04c.019-.536.02-1.175.02-1.95V8.28c0-1.336-.002-2.267-.097-2.97c-.091-.683-.26-1.044-.517-1.302c-.257-.257-.619-.425-1.301-.517c-.703-.094-1.634-.096-2.97-.096h-1.86c-1.335 0-2.266.002-2.97.096c-.682.092-1.043.26-1.3.517c-.258.258-.426.62-.518 1.302c-.094.703-.096 1.634-.096 2.97v4.624l.004-.003c.916-.941 2.335-.876 3.183.118l2.94 3.448c.236.276.546.289.783.093l.205-.169c1.076-.886 2.551-.77 3.508.24" fill="#ffffff" fill-rule="evenodd"/><path d="M5.016 4.5H5c-.465 0-.697 0-.891.03A2.5 2.5 0 0 0 2.03 6.61C2 6.803 2 7.035 2 7.5v9c0 .465 0 .697.03.891a2.5 2.5 0 0 0 2.08 2.079c.194.031.426.031.891.031h.016a6 6 0 0 1-.117-.624c-.108-.806-.108-1.832-.108-3.104V8.228c0-1.272 0-2.298.108-3.104q.043-.325.117-.624m13.968 15q.074-.299.116-.624c.109-.806.109-1.832.109-3.104V8.228c0-1.272 0-2.298-.109-3.104a6 6 0 0 0-.116-.624H19c.465 0 .697 0 .891.03a2.5 2.5 0 0 1 2.079 2.08c.031.194.031.426.031.891v9c0 .465 0 .697-.03.891a2.5 2.5 0 0 1-2.079 2.078c-.194.031-.426.031-.891.031z" fill="#ffffff" opacity=".5"/></svg>
+</div>
+</div>
+<span class="text-[10px] text-neutral-400">Notícias</span>
+</div>
+<div class="flex flex-col items-center gap-1.5">
+<div class="bg-neutral-800 w-14 h-14 rounded-full pt-[1px] pr-[1px] pb-[1px] pl-[1px]">
+<div class="w-full h-full rounded-full bg-black flex items-center justify-center border-2 border-black">
+<svg class="fill-current w-[24px] h-[24px]" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M2 15.616c0 .847.682 1.529 2.045 2.892l1.447 1.447C6.855 21.318 7.537 22 8.384 22s1.53-.682 2.893-2.045l8.678-8.678C21.318 9.913 22 9.23 22 8.384s-.682-1.529-2.045-2.892l-1.447-1.447C17.145 2.682 16.463 2 15.616 2c-.754 0-1.376.54-2.464 1.618l-1.05 1.048l-1.072 1.073l-1.05 1.048L8.91 7.86L7.86 8.909L6.788 9.98L5.74 11.03l-1.073 1.073l-1.048 1.049C2.539 14.24 2 14.862 2 15.616" fill="#ffffff" opacity=".5"/><path d="M13.238 3.691a1 1 0 0 0-.086-.073l-1.049 1.048q.033.045.074.086l1.414 1.414a.75.75 0 0 0 1.06-1.06zm-2.122 2.122a1 1 0 0 0-.086-.074L9.982 6.787q.033.045.074.086l2.121 2.122a.75.75 0 0 0 1.06-1.061zM8.995 7.934a1 1 0 0 0-.086-.074L7.86 8.908q.033.046.074.087l1.415 1.414a.75.75 0 1 0 1.06-1.06zm-2.121 2.121a1 1 0 0 0-.086-.074L5.739 11.03q.033.045.074.086l2.121 2.121a.75.75 0 1 0 1.061-1.06zm-2.122 2.122a1 1 0 0 0-.086-.075l-1.048 1.05q.033.045.074.085l1.414 1.414a.75.75 0 1 0 1.06-1.06z" fill="#ffffff"/></svg>
+</div>
+</div>
+<span class="text-[10px] text-neutral-400">Atualizações</span>
+</div>
+<div class="flex flex-col items-center gap-1.5">
+<div class="bg-neutral-800 w-14 h-14 rounded-full pt-[1px] pr-[1px] pb-[1px] pl-[1px]">
+<div class="flex bg-black w-full h-full border-black border-2 rounded-full items-center justify-center">
+<svg class="fill-current w-[24px] h-[24px]" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M14 22h-4c-3.771 0-5.657 0-6.828-1.172S2 17.771 2 14v-4c0-3.771 0-5.657 1.172-6.828S6.239 2 10.03 2c.606 0 1.091 0 1.5.017q-.02.12-.02.244l-.01 2.834c0 1.097 0 2.067.105 2.848c.114.847.375 1.694 1.067 2.386c.69.69 1.538.952 2.385 1.066c.781.105 1.751.105 2.848.105h4.052c.043.534.043 1.19.043 2.063V14c0 3.771 0 5.657-1.172 6.828S17.771 22 14 22" fill="#ffffff" fill-rule="evenodd" opacity=".5"/><path d="M10.56 15.498a.75.75 0 1 0-1.12-.996l-2.107 2.37l-.772-.87a.75.75 0 0 0-1.122.996l1.334 1.5a.75.75 0 0 0 1.12 0zm.95-13.238l-.01 2.835c0 1.097 0 2.066.105 2.848c.114.847.375 1.694 1.067 2.385c.69.691 1.538.953 2.385 1.067c.781.105 1.751.105 2.848.105h4.052q.02.232.028.5H22c0-.268 0-.402-.01-.56a5.3 5.3 0 0 0-.958-2.641c-.094-.128-.158-.204-.285-.357C19.954 7.494 18.91 6.312 18 5.5c-.81-.724-1.921-1.515-2.89-2.161c-.832-.556-1.248-.834-1.819-1.04a6 6 0 0 0-.506-.154c-.384-.095-.758-.128-1.285-.14z" fill="#ffffff"/></svg>
+</div>
+</div>
+<span class="text-[10px] text-neutral-400">Verificado</span>
+</div>
+<div class="flex flex-col items-center gap-1.5">
+<div class="w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-orange-400 to-pink-600">
+<div class="w-full h-full rounded-full bg-black flex items-center justify-center border-2 border-black">
+<div class="text-[9px] font-bold text-white">Novo</div>
+</div>
+</div>
+<span class="text-[10px] text-neutral-400">Recurso</span>
+</div>
+</div>
+<!-- feed-post -->
+<div class="flex flex-col pb-20">
+<div class="flex justify-between items-center px-4 py-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/00c67fef-ab0b-47aa-b2ca-4b8a84c0382c_320w.webp)] bg-cover bg-center border-white/10 border rounded-full"></div>
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-white">Lumina_oficial</span>
+<span class="text-[10px] text-neutral-500">Patrocinado</span>
+</div>
+</div>
+<svg class="text-white" height="20" viewbox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="12" fill="currentColor" r="2"/><circle cx="12" cy="12" fill="currentColor" r="2"/><circle cx="19" cy="12" fill="currentColor" r="2"/></svg>
+</div>
+<div class="w-full aspect-square bg-[#111] relative overflow-hidden group">
+<div class="bg-center bg-[url(https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/b02f3053-26c7-4f46-a379-f073cacac0f0_800w.webp)] bg-cover absolute top-0 right-0 bottom-0 left-0"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-orange-500/30 rounded-full blur-2xl"></div>
+<div class="flex overflow-hidden border-white/5 border rounded-xl absolute top-8 right-8 bottom-8 left-8 items-center justify-center">
+<div class="transform group-hover:rotate-6 transition-transform duration-700 bg-gradient-to-b from-white/10 via-white/0 to-white/10 w-24 h-24 rounded-2xl shadow-[0_5.7px_8.6px_rgba(0,_0,_0,_0.07),_0_13.7px_10.9px_rgba(0,_0,_0,_0.099),_0_25.7px_20.5px_rgba(0,_0,_0,_0.123),_0_45.8px_36.6px_rgba(0,_0,_0,_0.147),_0_85.8px_68.5px_rgba(0,_0,_0,_0.176),_0_205px_163.4px_rgba(0,_0,_0,_0.246)] backdrop-blur-md rotate-12" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 16px"></div>
+<div class="transform group-hover:-rotate-3 transition-transform duration-700 bg-gradient-to-b from-white/10 via-white/0 to-white/10 w-24 h-24 rounded-2xl absolute shadow-[0_5.7px_8.6px_rgba(0,_0,_0,_0.07),_0_13.7px_10.9px_rgba(0,_0,_0,_0.099),_0_25.7px_20.5px_rgba(0,_0,_0,_0.123),_0_45.8px_36.6px_rgba(0,_0,_0,_0.147),_0_85.8px_68.5px_rgba(0,_0,_0,_0.176),_0_205px_163.4px_rgba(0,_0,_0,_0.246)] backdrop-blur-md translate-x-4 translate-y-4 -rotate-6" style="position: relative; --border-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)); --border-radius-before: 16px"></div>
+</div>
+<div class="absolute bottom-4 left-4 px-3 py-1 bg-black/60 backdrop-blur border border-white/10 rounded-full flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></div>
+<span class="text-[10px] font-medium text-white">Gerado por IA</span>
+</div>
+</div>
+<div class="flex bg-gradient-to-b from-orange-400 to-orange-600 px-4 py-2.5 items-center justify-between">
+<span class="text-xs font-semibold text-white">Lorem ipsum dolor sit amet</span>
+<svg class="text-white" fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+</div>
+<div class="flex justify-between items-center px-4 py-3">
+<div class="flex gap-4 text-white">
+<svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12.62 20.81c-.34.12-.9.12-1.24 0C8.48 19.82 2 15.69 2 8.69 2 5.6 4.49 3.1 7.56 3.1c1.82 0 3.43.88 4.44 2.24a5.53 5.53 0 0 1 4.44-2.24C19.51 3.1 22 5.6 22 8.69c0 7-6.48 11.13-9.38 12.12z" fill="currentColor" opacity="0.5"/><path d="M12.62 20.81c-.34.12-.9.12-1.24 0C8.48 19.82 2 15.69 2 8.69 2 5.6 4.49 3.1 7.56 3.1c1.82 0 3.43.88 4.44 2.24a5.53 5.53 0 0 1 4.44-2.24C19.51 3.1 22 5.6 22 8.69c0 7-6.48 11.13-9.38 12.12z" fill="currentColor" opacity="0.2"/></svg>
+<svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5.025.45.79.196 1.75-.463 2.46A2.966 2.966 0 0 0 2.36 22H12z" fill="currentColor" opacity="0.5"/><path d="M16.5 13a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-4.5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-4.5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" fill="currentColor"/></svg>
+<svg fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12c0 5.523 4.477 10 10 10z" fill="currentColor" opacity="0.5"/><path d="M14.293 8.293a1 1 0 0 1 1.414 1.414l-2.293 2.293h3.586a1 1 0 1 1 0 2h-3.586l2.293 2.293a1 1 0 0 1-1.414 1.414l-4-4a1 1 0 0 1 0-1.414l4-4z" fill="currentColor"/></svg>
+</div>
+<svg class="text-white" fill="none" height="24" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-4.5L5 21z" fill="currentColor" opacity="0.5"/></svg>
+</div>
+<div class="px-4 pb-4">
+<p class="text-sm font-semibold text-white">12.453 curtidas</p>
+<p class="text-sm text-neutral-300 mt-1">
+<span class="font-semibold text-white">Lumina_oficial</span>
+Lorem ipsum dolor sit amet consectetur adipiscing 2.0 🚀
+<span class="text-blue-400">#FeitoComLumina</span>
+</p>
+</div>
+</div>
+<div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/20 rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>w-[340px] h-[680px]</b> bg-[#0a0a0a] border-[6px] border-[#1a1a1a] rounded-[3rem] shadow-2xl · rotate-[-2deg] → hover:rotate-0 (700ms) · notch w-32 h-7 · status bar · sticky app header (Instrument Serif mark) · story rings from-orange-400 to-pink-600 · sponsored post (supabase images) with glass tiles, orange CTA strip, actions and caption · home bar white/20</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Logo wall</h3>
+<div class="ds-stage">
+<div class="mt-24">
+<p class="text-lg font-medium mb-8 uppercase tracking-widest text-center md:text-left text-neutral-500">Lorem ipsum dolor sit amet</p>
+<div class="flex flex-wrap gap-8 md:gap-12 hover:grayscale-0 transition-all duration-500 opacity-60 grayscale gap-x-8 gap-y-8 items-center justify-between">
+<img src="assets/overview/assets/images/svg/logo-amp.svg" class="w-[256px] h-[32px]" alt="Logotipo AMP"/>
+<img src="assets/overview/assets/images/svg/logo-adobe.svg" class="w-[256px] h-[32px]" alt="Logotipo Adobe"/>
+<img src="assets/overview/assets/images/svg/logo-100tb.svg" class="w-[256px] h-[32px]" alt="Logotipo 100TB"/>
+<img src="assets/overview/assets/images/svg/logo-active-campaign.svg" class="w-[256px] h-[32px]" alt="Logotipo ActiveCampaign"/>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>flex flex-wrap justify-between gap-8 md:gap-12</b> · opacity-60 <b>grayscale</b> → hover:grayscale-0 (500ms) · img w-[256px] h-[32px] · caption text-lg 500 uppercase tracking-widest neutral-500</code></div>
+</div>
+</section>
+
+<!-- ============================================================ 13 content groups -->
+<section class="ds-group" id="components-content">
+<div class="ds-head">
+<div class="ds-eyebrow"><span class="flex h-2 w-2 rounded-full bg-orange-500"></span><span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Components · 13</span></div>
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Content groups</h2>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Hero intro</h3>
+<div class="ds-stage" style="padding-left:0">
+<div class="col-span-1 lg:col-span-6 pl-6 md:pl-10 pt-10 lg:pt-0 flex flex-col justify-center">
+<div class="inline-flex items-center gap-2 text-orange-500 mb-8">
+<span class="flex h-2 w-2 rounded-full bg-orange-500"></span>
+<span class="text-xs font-bold tracking-widest uppercase text-orange-500/80">Lorem Ipsum 2.0</span>
+</div>
+<h1 class="text-6xl md:text-7xl lg:text-8xl leading-[0.9] tracking-tighter text-white font-medium mb-6">
+Lumina
+<span class="text-transparent bg-clip-text bg-gradient-to-r from-white via-neutral-200 to-neutral-500">Design System</span>
+</h1>
+<p class="leading-relaxed text-lg font-medium text-white/60 max-w-lg">
+An amber WebGL aura over near-black, orange light beams falling through a vertical grid, frosted glass steps and glowing particle buttons.
+</p>
+<div class="mt-10 flex flex-wrap gap-6 items-center">
+<a class="group isolate inline-flex cursor-pointer overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-[0_0_50px_10px_rgba(249,115,22,0.45)] bg-gradient-to-b from-white/20 via-white/0 to-white/5 rounded-full relative shadow-[0_0_25px_rgba(249,115,22,0.3),0_8px_40px_rgba(249,115,22,0.15)]" href="#">
+<div class="absolute inset-0 overflow-hidden rounded-full">
+<div class="absolute inset-[-100%] w-[300%] h-[300%] left-[-100%] top-[-100%] animate-[spin_3s_linear_infinite]" style="background: conic-gradient(from 0deg, transparent 0deg, transparent 80deg, rgba(253,186,116,0.8) 180deg, transparent 280deg, transparent 360deg);"></div>
+</div>
+<div class="absolute inset-[1px] rounded-full backdrop-blur-xl z-0 bg-neutral-950/90"></div>
+<div class="z-10 flex gap-3 sm:w-auto overflow-hidden text-sm font-medium text-white w-full rounded-full pt-3 pr-5 pb-3 pl-4 relative items-center">
+<div class="relative z-20 w-7 h-7 rounded-full bg-gradient-to-b from-orange-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-500/30 ring-1 ring-white/20 group-hover:scale-110 transition-transform duration-300">
+<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="width:14px;height:14px;"><path d="M3.845 3.845a2.883 2.883 0 0 0 0 4.077L5.432 9.51c.012-.014.555.503.568.49l4-4c.013-.013-.504-.556-.49-.568L7.922 3.845a2.883 2.883 0 0 0-4.077 0m1.288 11.462a.483.483 0 0 1 .9 0l.157.4a.48.48 0 0 0 .272.273l.398.157a.486.486 0 0 1 0 .903l-.398.158a.48.48 0 0 0-.272.273l-.157.4a.483.483 0 0 1-.9 0l-.157-.4a.48.48 0 0 0-.272-.273l-.398-.158a.486.486 0 0 1 0-.903l.398-.157a.48.48 0 0 0 .272-.274z" fill="#ffffff" opacity=".5"/><path d="M19.967 9.13a.483.483 0 0 1 .9 0l.156.399c.05.125.148.224.273.273l.398.158a.486.486 0 0 1 0 .902l-.398.158a.5.5 0 0 0-.273.273l-.156.4a.483.483 0 0 1-.9 0l-.157-.4a.5.5 0 0 0-.272-.273l-.398-.158a.486.486 0 0 1 0-.902l.398-.158a.5.5 0 0 0 .272-.273z" fill="#ffffff" opacity=".2"/><path d="M16.1 2.307a.483.483 0 0 1 .9 0l.43 1.095a.48.48 0 0 0 .272.274l1.091.432a.486.486 0 0 1 0 .903l-1.09.432a.5.5 0 0 0-.273.273L17 6.81a.483.483 0 0 1-.9 0l-.43-1.095a.5.5 0 0 0-.273-.273l-1.09-.432a.486.486 0 0 1 0-.903l1.09-.432a.5.5 0 0 0 .273-.274z" fill="#ffffff" opacity=".7"/><path d="M10.568 6.49c-.012.014-.555-.503-.568-.49l-4 4c-.013.013.504.556.49.568l9.588 9.587a2.883 2.883 0 1 0 4.078-4.077z" fill="#ffffff"/></svg>
+</div>
+<span class="whitespace-nowrap relative z-10 font-medium tracking-tight text-base text-white/95 group-hover:text-white transition-colors">Lorem Ipsum</span>
+<span class="inline-flex items-center justify-center z-10 bg-white/10 w-6 h-6 rounded-full ml-1 relative group-hover:translate-x-0.5 transition-transform text-white/80 group-hover:text-white">
+<i data-lucide="arrow-right" class="w-3 h-3"></i>
+</span>
+</div>
+</a>
+<div class="flex items-center gap-2 text-xs font-medium text-neutral-500">
+<i data-lucide="check" class="w-3.5 h-3.5 text-orange-500"></i>
+<span>Lorem ipsum dolor sit amet</span>
+</div>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>hero left column</b> · dot eyebrow mb-8 · h1 text-6xl md:text-7xl lg:text-8xl leading-[0.9] tracking-tighter 500 with gradient span · lead text-lg white/60 max-w-lg · CTA row mt-10 gap-6 · each line enters with fadeSlideIn (0.1s → 0.5s)</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Headline block</h3>
+<div class="ds-stage">
+<div class="col-span-1 lg:col-span-6 flex flex-col justify-end text-right lg:text-left">
+<div class="flex items-center gap-2 lg:justify-start justify-end mb-3 text-orange-400 text-xs font-medium uppercase tracking-wider">
+<i data-lucide="sparkles" class="w-3 h-3"></i>
+<span>Lorem 2.0 Ipsum</span>
+</div>
+<h2 class="text-4xl lg:text-5xl font-normal tracking-tighter text-white">
+Lorem ipsum dolor
+<span class="text-white/60">sit amet elit.</span>
+</h2>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>flex flex-col justify-end</b> text-right → lg:text-left · sparkles eyebrow · h2 text-4xl lg:text-5xl 400 tracking-tighter, tail span white/60</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Statement</h3>
+<div class="ds-stage">
+<div class="relative">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[80%] bg-orange-500/10 blur-[120px] -z-10 rounded-full pointer-events-none"></div>
+<h3 class="leading-[1.05] md:text-6xl lg:text-7xl text-5xl font-medium text-white/40 tracking-tight max-w-6xl">
+<span class="text-white">Lorem ipsum dolor sit amet consectetur</span>
+adipiscing elit sed do eiusmod tempor
+<span class="text-white">incididunt ut labore.</span>
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+<span class="text-white">consequat duis aute</span>
+irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+</h3>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>about h3</b> leading-[1.05] text-5xl md:text-6xl lg:text-7xl 500 <b>text-white/40</b> with span.text-white highlights · glow w-[60%] h-[80%] bg-orange-500/10 blur-[120px] -z-10</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Case-study list</h3>
+<div class="ds-stage">
+<div class="flex flex-col md:flex-row justify-between md:items-end mb-20 gap-8">
+<h2 class="text-5xl md:text-6xl font-medium tracking-tighter text-white">Lorem Ipsum Sit</h2>
+<div class="flex items-center gap-2 text-sm font-medium text-neutral-500 mb-1">
+<span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+<span class="uppercase tracking-widest text-xs">Lorem Ipsum</span>
+</div>
+</div>
+<div class="flex flex-col w-full border-t border-white/5">
+<!-- row-fintech -->
+<div class="group relative border-b border-white/5 transition-colors duration-300 hover:bg-white/[0.02] cursor-pointer">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 pt-8 pb-8 gap-x-6 gap-y-6 items-center">
+<div class="col-span-1 md:col-span-3">
+<span class="text-xs font-semibold tracking-widest uppercase text-neutral-500 group-hover:text-white transition-colors">Lorem</span>
+</div>
+<div class="col-span-1 md:col-span-8 flex items-center gap-3">
+<svg class="h-6 w-auto text-white opacity-80 group-hover:opacity-100 transition-opacity" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect fill="currentColor" fill-opacity="0.2" height="12" rx="2" width="20" x="2" y="6"/><path d="M2 10H22" stroke="currentColor" stroke-width="1.5"/><path d="M6 14H10" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"/></svg>
+<span class="text-lg font-semibold tracking-tight text-white">Lorem Dolorem</span>
+</div>
+<div class="col-span-1 flex justify-end">
+<svg class="w-6 h-6 text-neutral-600 group-hover:text-white transition-colors" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.1" r="10"/><path d="M10 16L14 12L10 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
+</div>
+</div>
+</div>
+<!-- row-infrastructure -->
+<div class="group relative border-b border-white/5 transition-colors duration-300 hover:bg-white/[0.02] cursor-pointer">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 pt-8 pb-8 gap-x-6 gap-y-6 items-center">
+<div class="col-span-1 md:col-span-3">
+<span class="text-xs font-semibold tracking-widest uppercase text-neutral-500 group-hover:text-white transition-colors">Consectetur</span>
+</div>
+<div class="col-span-1 md:col-span-8 flex items-center gap-3">
+<svg class="h-5 w-auto text-white opacity-80 group-hover:opacity-100 transition-opacity" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L24 22H0L12 1Z" stroke="currentColor" stroke-linejoin="round" stroke-width="1.5"/></svg>
+<span class="text-lg font-semibold tracking-tight text-white">Ipsum</span>
+</div>
+<div class="col-span-1 flex justify-end">
+<svg class="w-6 h-6 text-neutral-600 group-hover:text-white transition-colors" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.1" r="10"/><path d="M10 16L14 12L10 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
+</div>
+</div>
+</div>
+<!-- row-database -->
+<div class="group relative border-b border-white/5 transition-colors duration-300 hover:bg-white/[0.02] cursor-pointer">
+<div class="grid grid-cols-1 md:grid-cols-12 pt-8 pb-8 gap-x-6 gap-y-6 items-center">
+<div class="col-span-1 md:col-span-3">
+<span class="text-xs font-semibold tracking-widest uppercase text-neutral-500 group-hover:text-white transition-colors">Dolor Sit Amet</span>
+</div>
+<div class="col-span-1 md:col-span-8 flex items-center gap-3">
+<svg class="h-6 w-auto text-white opacity-80 group-hover:opacity-100 transition-opacity" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L5 11H11L9 22L17 13H11L13 2Z" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-linejoin="round" stroke-width="1.5"/></svg>
+<span class="text-lg font-semibold tracking-tight text-white">Adipisci</span>
+</div>
+<div class="col-span-1 flex justify-end">
+<svg class="w-6 h-6 text-neutral-600 group-hover:text-white transition-colors" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.1" r="10"/><path d="M10 16L14 12L10 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
+</div>
+</div>
+</div>
+<!-- row-productivity-expanded -->
+<div class="border-white/5 border-b relative">
+<div class="grid grid-cols-1 md:grid-cols-12 cursor-pointer pt-8 pb-8 gap-x-6 gap-y-6 items-start">
+<div class="col-span-1 md:col-span-3 flex flex-col gap-1">
+<span class="text-xs font-semibold tracking-widest uppercase text-orange-500">Elit Sed Do</span>
+<span class="text-[10px] font-medium text-neutral-500">48 Lorem Ipsum</span>
+</div>
+<div class="col-span-1 md:col-span-8 flex items-center gap-3">
+<svg class="h-6 w-auto text-white" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" fill-opacity="0.2"/><path d="M8 8L16 16M16 8L8 16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
+<span class="text-lg font-semibold tracking-tight text-white">Tempor Labore</span>
+</div>
+<div class="col-span-1 flex justify-end">
+<svg class="w-6 h-6 text-white" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.2" r="10"/><path d="M8 12H16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-6 pb-12 gap-x-8 gap-y-8">
+<div class="hidden md:block col-span-3 relative">
+<div class="absolute right-8 top-0 bottom-4 w-px bg-gradient-to-b from-white/10 to-transparent"></div>
+</div>
+<div class="col-span-1 md:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-8 pr-4 pl-4 md:pl-0">
+<div class="flex flex-col gap-3">
+<span class="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Lorem</span>
+<p class="text-sm leading-relaxed text-neutral-300">Lorem ipsum dolor sit amet
+<span class="text-white font-medium">consectetur elit</span>
+sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim.
+</p>
+</div>
+<div class="flex flex-col gap-3">
+<span class="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Ipsum</span>
+<p class="text-sm leading-relaxed text-neutral-300">Ut enim ad minim veniam quis nostrud exercitation
+<span class="text-white font-medium">ullamco laboris</span>
+nisi ut aliquip ex ea commodo consequat.
+</p>
+</div>
+<div class="flex flex-col gap-3">
+<span class="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Dolor</span>
+<p class="text-sm leading-relaxed text-neutral-300">Duis aute
+<span class="text-orange-400 font-semibold">irure dolor 40%</span>
+in reprehenderit in voluptate velit esse cillum dolore.
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="ds-cap"><code class="ds-meta"><b>rows</b> grid md:grid-cols-12 py-8 border-b border-white/5 · label col-span-3 text-xs 600 uppercase tracking-widest neutral-500 → group-hover white · name col-span-8 icon + text-lg 600 · chevron-circle neutral-600 → white · hover bg-white/[0.02] · <b>expanded</b>: label orange-500 + micro count, minus-circle, three-column Lorem / Ipsum / Dolor detail (text-sm neutral-300, highlight white / orange-400)</code></div>
+</div>
+
+<div class="ds-spec">
+<h3 class="ds-spec-title">Footer contact</h3>
+<div class="ds-fitbox"><div class="ds-fit">
+<div class="overflow-hidden group bg-[#050505] w-full border-white/5 border-t relative">
+<div class="pointer-events-none z-0 absolute top-0 right-0 bottom-0 left-0">
+<div class="opacity-30 absolute top-0 right-0 bottom-0 left-0"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-[#050505]/80"></div>
+<div class="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+<img alt="Textura" class="opacity-20 mix-blend-luminosity w-full h-full object-cover absolute top-0 right-0 bottom-0 left-0 blur-sm" src="assets/overview/assets/4c087a1e-aa65-42f7-9a89-dc582f_965f3b40854f.webp"/>
+</div>
+<div class="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-10 pt-24 pb-0 flex flex-col min-h-[85vh] justify-between">
+<div class="flex flex-col md:flex-row justify-between items-start w-full gap-12 border-b border-white/5 pb-12">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.2)]">
+<svg fill="none" height="16" viewbox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.15" r="10"/><path d="M8 12C8 12.5523 7.55228 13 7 13C6.44772 13 6 12.5523 6 12C6 11.4477 6.44772 11 7 11C7.55228 11 8 11.4477 8 12Z" fill="currentColor"/><path d="M13 12C13 12.5523 12.5523 13 12 13C11.4477 13 11 12.5523 11 12C11 11.4477 11.4477 11 12 11C12.5523 11 13 11.4477 13 12Z" fill="currentColor"/><path d="M18 12C18 12.5523 17.5523 13 17 13C16.4477 13 16 12.5523 16 12C16 11.4477 16.4477 11 17 11C17.5523 11 18 11.4477 18 12Z" fill="currentColor"/></svg>
+</div>
+<span class="text-xs font-bold tracking-[0.2em] uppercase text-neutral-400">Lorem Ipsum</span>
+</div>
+<div class="flex flex-wrap gap-8 md:gap-12 text-xs font-semibold tracking-widest uppercase text-neutral-500">
+<a class="hover:text-white transition-colors duration-300" href="#">Privacidade &amp; Política</a>
+<a class="hover:text-white transition-colors duration-300" href="#">Termos de Serviço</a>
+<span class="text-neutral-700">@2025 Lumina Creative Inc.</span>
+</div>
+</div>
+<div class="flex flex-col gap-6 mt-16 mb-auto relative">
+<div class="group/item relative flex flex-col items-start w-fit">
+<a class="relative z-10 text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter text-white group-hover/item:text-transparent group-hover/item:bg-clip-text group-hover/item:bg-gradient-to-r group-hover/item:from-white group-hover/item:to-neutral-500 transition-all duration-500" href="tel:+18005550199">+1 800 555 0199</a>
+<div class="absolute -right-8 top-4 opacity-0 group-hover/item:opacity-100 transition-opacity duration-500 translate-x-2 group-hover/item:translate-x-0">
+<span class="flex items-center justify-center w-5 h-5 rounded bg-orange-500 text-[9px] font-bold text-black uppercase tracking-wider shadow-[0_0_15px_rgba(249,115,22,0.6)]">T</span>
+</div>
+</div>
+<div class="group/item relative flex flex-col items-start w-fit">
+<a class="relative z-10 text-5xl md:text-7xl lg:text-8xl font-medium tracking-tighter text-white group-hover/item:text-transparent group-hover/item:bg-clip-text group-hover/item:bg-gradient-to-r group-hover/item:from-white group-hover/item:to-neutral-500 transition-all duration-500" href="mailto:hello@lumina.ai">OLA@LUMINA.AI</a>
+<div class="absolute -right-8 top-4 opacity-0 group-hover/item:opacity-100 transition-opacity duration-500 translate-x-2 group-hover/item:translate-x-0">
+<span class="flex items-center justify-center w-5 h-5 rounded bg-orange-500 text-[9px] font-bold text-black uppercase tracking-wider shadow-[0_0_15px_rgba(249,115,22,0.6)]">E</span>
+</div>
+</div>
+<div class="flex items-center gap-8 mt-12 pl-1">
+<a class="text-neutral-600 hover:text-white transition-colors duration-300 transform hover:scale-110" href="#">
+<svg class="w-6 h-6 fill-current" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>X</title><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+</a>
+<a class="text-neutral-600 hover:text-white transition-colors duration-300 transform hover:scale-110" href="#">
+<svg class="w-6 h-6 fill-current" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.419-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a>
+<a class="text-neutral-600 hover:text-white transition-colors duration-300 transform hover:scale-110" href="#">
+<svg class="w-6 h-6 fill-current" role="img" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+</a>
+</div>
+</div>
+<div class="relative w-full mt-12 select-none overflow-hidden">
+<h1 class="text-[17vw] leading-[0.75] font-bold tracking-tighter text-center md:text-left text-white mix-blend-overlay opacity-90 pointer-events-none">LUMINA</h1>
+<div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#050505] to-transparent"></div>
+</div>
+</div>
+</div>
+</div></div>
+<div class="ds-cap"><code class="ds-meta"><b>footer</b> bg-[#050505] border-t white/5 · texture ground · max-w-7xl pt-24 min-h-[85vh] · header row: contact chip + label, legal links · display links (tel / mailto) with key tags · social links · wordmark text-[17vw] 700 mix-blend-overlay opacity-90 with to-t fade · rendered at the window's width and scaled to the column</code></div>
+</div>
+</section>
+
+</main>
+</div>
+</div>
+
+<script>
+/* routing: #overview (default, no hash) | #components; the frame reports scroll + readiness */
+(function () {
+  var COMPONENTS_ENABLED = true;           /* Overview approved (orchestrated run) */
+  var body = document.body, nav = document.getElementById('ds-nav'), frame = document.getElementById('overview-frame');
+  var linkO = document.getElementById('nav-overview'), linkC = document.getElementById('nav-components');
+  var isComp = function (h) { return h === '#components' || h.indexOf('#components-') === 0; };
+  var frameY = 0;
+  if (!COMPONENTS_ENABLED) linkC.setAttribute('aria-disabled', 'true');
+
+  /* in the Overview the navbar sits in the page's flow, so it scrolls away with the page */
+  function placeNav() { nav.style.transform = frameY ? 'translate3d(0,' + (-frameY) + 'px,0)' : ''; }
+
+  function route() {
+    var h = location.hash;
+    if (isComp(h) && !COMPONENTS_ENABLED) { history.replaceState(null, '', location.pathname + location.search); h = ''; }
+    var comp = isComp(h);
+    body.classList.toggle('is-components', comp);
+    linkO.classList.toggle('is-on', !comp);
+    linkC.classList.toggle('is-on', comp);
+    if (!comp) placeNav();
+    if (window.dsComponents) window.dsComponents(h);
+  }
+
+  addEventListener('message', function (e) {
+    if (e.source !== frame.contentWindow || !e.data) return;
+    if (e.data.ds === 'ready') body.classList.add('ds-overview-ready');
+    if (e.data.ds === 'scroll') { frameY = Math.max(0, +e.data.y || 0); if (!body.classList.contains('is-components')) placeNav(); }
+  });
+
+  nav.addEventListener('click', function (e) {
+    if (e.target.closest('[data-ds-inert]')) { e.preventDefault(); return; }
+    var a = e.target.closest('a[data-ds-goto]');
+    if (!a) return;
+    /* logo: back to the Overview and to the top of the page */
+    e.preventDefault();
+    if (body.classList.contains('is-components')) { history.pushState(null, '', '#overview'); route(); }
+    try { frame.contentWindow.postMessage({ ds: 'goto' }, '*'); } catch (err) {}
+  });
+
+  addEventListener('hashchange', route);
+  window.dsRoute = route;
+  route();
+})();
+</script>
+<!-- the Overview's own script: Lucide icons (stroke 1.5) and the step list / card stack -->
+<script src="assets/overview/assets/js/interactions.js"></script>
+<script>
+/* components view: layout under the catalog navbar, scroll-spy, specimen isolation, scroll forwarding,
+   the page's Unicorn Studio loader (started on first view), intro holds and replays */
+(function () {
+  var main = document.getElementById('ds-main'), side = document.getElementById('ds-side'), nav = document.getElementById('ds-nav');
+  var groups = [].slice.call(main.querySelectorAll('.ds-group'));
+  var sideLinks = [].slice.call(side.querySelectorAll('a'));
+  var visible = false, usStarted = false;
+
+  /* the view starts under the catalog navbar */
+  function navH() {
+    var n = nav.querySelector('nav'), h = n ? n.getBoundingClientRect().height : 0;
+    if (h) document.body.style.setProperty('--ds-navh', Math.ceil(h) + 'px');
+  }
+
+  /* full-width specimens keep the page's layout at this window's width, scaled to the column */
+  function fit() {
+    main.querySelectorAll('.ds-fit').forEach(function (f) { var w = f.parentElement.clientWidth; if (w) f.style.zoom = w / innerWidth; });
+  }
+  addEventListener('resize', function () { navH(); if (visible) { fit(); spy(); } });
+
+  /* the aura is the page's own loader (unicorn-studio.js → unicornStudio.umd.js v1.4.29, init());
+     it starts once the view is on screen so every scene is measured at its real size */
+  function startUnicorn() {
+    if (usStarted) return;
+    usStarted = true;
+    var s = document.createElement('script');
+    s.src = 'assets/overview/assets/js/unicorn-studio.js';
+    document.body.appendChild(s);
+  }
+
+  /* sidebar follows the scroll */
+  function spy() {
+    var y = main.scrollTop + 160, cur = groups[0];
+    groups.forEach(function (g) { if (g.offsetTop <= y) cur = g; });
+    sideLinks.forEach(function (a) {
+      var on = a.getAttribute('href') === '#' + cur.id;
+      if (on && !a.classList.contains('is-current') && side.scrollWidth > side.clientWidth + 2)
+        side.scrollLeft = a.offsetLeft - 16;
+      a.classList.toggle('is-current', on);
+    });
+  }
+  var queued = false;
+  main.addEventListener('scroll', function () {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () {
+      queued = false;
+      if (!visible) return;
+      spy();
+      /* live scenes that track window scroll see the catalog's scroll too */
+      window.dispatchEvent(new Event('scroll'));
+    });
+  }, { passive: true });
+
+  /* sidebar links scroll the view (and keep the hash) */
+  side.addEventListener('click', function (e) {
+    var a = e.target.closest('a');
+    if (!a) return;
+    e.preventDefault();
+    history.pushState(null, '', a.getAttribute('href'));
+    window.dsComponents(a.getAttribute('href'));
+  });
+
+  /* specimens stay put: links and form submits never navigate */
+  main.addEventListener('click', function (e) { var a = e.target.closest('a'); if (a) e.preventDefault(); });
+  main.addEventListener('submit', function (e) { e.preventDefault(); }, true);
+
+  /* intros held until first seen, then played with the page's own keyframes */
+  var holdIO = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.remove('ds-hold'); holdIO.unobserve(e.target); } });
+  }, { root: main, threshold: 0.2 });
+  main.querySelectorAll('.ds-hold').forEach(function (el) { holdIO.observe(el); });
+
+  /* replays: re-insert the specimen so its keyframes run again */
+  main.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ds-replay]');
+    if (!b) return;
+    var el = document.getElementById(b.getAttribute('data-ds-replay'));
+    if (!el) return;
+    var cl = el.cloneNode(true);
+    cl.classList.remove('ds-hold');
+    el.replaceWith(cl);
+  });
+
+  window.dsComponents = function (h) {
+    visible = h === '#components' || h.indexOf('#components-') === 0;
+    if (!visible) return;
+    navH();
+    fit();
+    startUnicorn();
+    if (h === '#components') main.scrollTop = 0;
+    else { var el = document.getElementById(h.slice(1)); if (el) main.scrollTop = el.offsetTop - 12; }
+    spy();
+  };
+  navH();
+  if (window.dsRoute) window.dsRoute();
+})();
+</script>
+</body>
+</html>

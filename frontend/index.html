@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumina Chat</title>
+<!-- design system: Instrument Serif, particle button, border-gradient mask, beam-fall e fadeSlideIn -->
+<link rel="stylesheet" href="lumina-video-design-system/assets/overview/assets/css2_2b2d87bc82d8.css">
+<link rel="stylesheet" href="lumina-video-design-system/assets/overview/assets/css/components.css">
+<link rel="stylesheet" href="lumina-video-design-system/assets/overview/assets/css/animations.css">
+<style>
+/* ================================================================ tokens do Lumina */
+:root {
+  --ground: #050505;
+  --screen: #0a0a0a;
+  --bezel: #1a1a1a;
+  --orange-300: #fdba74;
+  --orange-400: #fb923c;
+  --orange-500: #f97316;
+  --orange-600: #ea580c;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --neutral-200: #e5e5e5;
+  --neutral-300: #d4d4d4;
+  --neutral-400: #a3a3a3;
+  --neutral-500: #737373;
+  --neutral-600: #525252;
+  --green-400: #4ade80;
+  --hairline: rgba(255, 255, 255, .05);
+  --card-edge: rgba(255, 255, 255, .1);
+  --glass: rgba(255, 255, 255, .05);
+  --white-60: rgba(255, 255, 255, .6);
+  --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --ease-enter: cubic-bezier(.2, .8, .2, 1);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, .25);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, .1), 0 8px 10px -6px rgba(0, 0, 0, .1);
+  --column: 768px;
+}
+
+/* ================================================================ base */
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+/* so o body tem fundo: um fundo no html esconderia a aura, que fica em z-index negativo */
+body {
+  overflow: hidden;
+  background: var(--ground);
+  color: #fff;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button, textarea, input { font: inherit; color: inherit; }
+button { background: none; border: 0; padding: 0; cursor: pointer; }
+h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding: 0; }
+::selection { background: rgba(249, 115, 22, .3); }
+:focus-visible { outline: 2px solid var(--orange-400); outline-offset: 2px; }
+.icon-12 { width: 12px; height: 12px; }
+.icon-14 { width: 14px; height: 14px; }
+.icon-16 { width: 16px; height: 16px; }
+.icon-20 { width: 20px; height: 20px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 50% { opacity: .5; } }
+
+/* entradas: mesmo keyframe do hero; backwards devolve o texto sem filtro ao terminar */
+.enter { animation: fadeSlideIn 1s var(--ease-enter) var(--delay, 0s) backwards; }
+
+/* ================================================================ fundo: aura, paisagem e grade */
+.aura {
+  position: fixed; top: 0; width: 100%; height: 100vh; z-index: -10;
+  filter: hue-rotate(90deg) saturate(.5);
+  mix-blend-mode: screen;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 0%, black 80%, transparent);
+}
+.aura > div, .aura > div > div { position: absolute; inset: 0; z-index: -10; }
+.landscape { position: fixed; inset: 0; z-index: 0; }
+.landscape img { display: block; width: 100%; height: 100%; object-fit: cover; opacity: .4; mix-blend-mode: luminosity; }
+.landscape::before, .landscape::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+.landscape::before { background: linear-gradient(to bottom, rgba(5, 5, 5, .9), rgba(5, 5, 5, .6), var(--ground)); }
+.landscape::after { background: radial-gradient(ellipse at center, rgba(124, 45, 18, .1), rgba(5, 5, 5, 0), rgba(5, 5, 5, 0)); }
+.beam-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  display: flex; width: 100%; max-width: 80rem; margin: 0 auto;
+  border-right: 1px solid var(--hairline); opacity: .6;
+}
+.beam-col { position: relative; flex: 1; height: 100%; overflow: hidden; border-left: 1px solid var(--hairline); }
+.beam-col > span { position: absolute; bottom: 32px; left: 16px; font: 12px/16px var(--font-mono); color: rgba(255, 255, 255, .1); }
+.beam { position: absolute; top: 0; left: -1px; width: 1px; }
+.beam-60 { background: linear-gradient(to bottom, transparent, rgba(249, 115, 22, .6), transparent); }
+.beam-80 { background: linear-gradient(to bottom, transparent, rgba(249, 115, 22, .8), transparent); }
+.beam-100 { background: linear-gradient(to bottom, transparent, var(--orange-500), transparent); }
+.beam-center { left: 50%; margin-left: -.5px; }
+.beam-guide { position: absolute; top: 0; bottom: 0; left: 50%; border-right: 1px dashed rgba(249, 115, 22, .2); }
+
+/* ================================================================ estrutura */
+.app {
+  position: relative; z-index: 1;
+  display: grid; grid-template-columns: 296px minmax(0, 1fr);
+  height: 100vh; height: 100dvh;
+}
+.chat { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.column { width: 100%; max-width: var(--column); margin: 0 auto; padding: 0 24px; }
+
+/* ================================================================ logo */
+.logo {
+  position: relative; flex: none; display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 9999px;
+  background: linear-gradient(to top right, var(--orange-500), var(--amber-500));
+}
+.logo-core { position: relative; width: 10px; height: 10px; border-radius: 9999px; background: #000; }
+.logo-small { width: 24px; height: 24px; }
+.logo-small .logo-core { width: 8px; height: 8px; }
+
+/* ================================================================ barra lateral */
+.side { min-height: 0; padding: 12px 0 12px 12px; }
+.side-plate {
+  display: flex; flex-direction: column; height: 100%;
+  border-radius: 14px; border: 1px solid var(--card-edge);
+  background: rgba(10, 10, 10, .86);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .5);
+}
+.side-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 16px; }
+.brand { display: flex; align-items: center; gap: 12px; font-size: 1.125rem; font-weight: 600; letter-spacing: -.025em; }
+.side-new { padding: 0 16px 20px; }
+.side-label {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px 10px;
+  font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--neutral-500);
+}
+.side-label b { font: 400 10px/1 var(--font-mono); letter-spacing: 0; color: var(--neutral-600); }
+.conversations {
+  flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none;
+  display: flex; flex-direction: column; gap: 4px;
+  list-style: none; margin: 0; padding: 2px 14px 12px 20px;
+}
+.conversations-empty { padding: 4px 0; font-size: .875rem; line-height: 1.6; color: var(--neutral-500); }
+.conversation { position: relative; }
+
+/* item da lista: mesmos estados do .step-item */
+.step {
+  position: relative; display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 8px 34px 8px 8px; border-radius: 8px; text-align: left;
+  transition: all .3s;
+}
+.step-badge {
+  flex: none; display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 9999px;
+  font-size: 10px; font-weight: 700; color: var(--neutral-500);
+  transition: color .3s, background-color .3s;
+}
+.step-text {
+  min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-size: .875rem; font-weight: 500; color: var(--neutral-400);
+  transition: color .3s;
+}
+.step:hover { background: var(--glass); }
+.step:hover .step-badge { color: var(--orange-400); }
+.step:hover .step-text { color: #fff; }
+.step.is-active {
+  background: var(--glass); box-shadow: var(--shadow-xl);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  transform: translateX(-10px);
+}
+.step.is-active .step-badge { background: var(--orange-500); color: #000; box-shadow: 0 10px 15px -3px rgba(249, 115, 22, .2); }
+.step.is-active .step-text { color: #fff; }
+.step-delete {
+  position: absolute; top: 50%; right: 6px; margin-top: -13px;
+  display: flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 6px;
+  color: var(--neutral-500); opacity: 0;
+  transition: opacity .3s, color .3s, background-color .3s;
+}
+.conversation:hover .step-delete, .step-delete:focus-visible, .step-delete.is-confirming { opacity: 1; }
+.step-delete:hover { color: #fff; background: var(--glass); }
+.step-delete.is-confirming { color: var(--orange-500); }
+.side-foot { padding: 12px 14px 14px 20px; border-top: 1px solid var(--hairline); font-size: .75rem; line-height: 1.5; color: var(--neutral-500); }
+.account { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.account-avatar {
+  flex: none; display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 9999px;
+  border: 2px solid var(--orange-400); background: #000;
+  font-size: 10px; font-weight: 700; color: #fff;
+}
+.account-name { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: .875rem; font-weight: 500; color: #fff; }
+
+/* ================================================================ anel do CTA e do campo de mensagem */
+/* o original gira um retangulo de 300%: em um elemento largo ele deixaria as pontas descobertas.
+   aqui a camada e sempre quadrada, com lado de 150% da largura, entao cobre o elemento em qualquer angulo.
+   o centro do gradiente sai de 50% de proposito: exato, ele riscava um fio de 1px em larguras impares */
+.ring { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; }
+.ring-sweep {
+  position: absolute; left: -25%; top: 50%; width: 150%; aspect-ratio: 1; margin-top: -75%;
+  background: conic-gradient(from 0deg at 50.05% 50.05%, transparent 0deg, transparent 80deg, rgba(253, 186, 116, .8) 180deg, transparent 280deg, transparent 360deg);
+  animation: spin 3s linear infinite;
+}
+.plate {
+  position: absolute; inset: 1px; border-radius: inherit;
+  background: rgba(10, 10, 10, .9);
+  -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+}
+
+/* Glow CTA pill */
+.cta {
+  position: relative; isolation: isolate; display: block; width: 100%; overflow: hidden;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0), rgba(255, 255, 255, .05));
+  box-shadow: 0 0 25px rgba(249, 115, 22, .3), 0 8px 40px rgba(249, 115, 22, .15);
+  transition: all .3s;
+}
+.cta .ring-sweep { animation-play-state: paused; }
+.cta:hover .ring-sweep, .cta:focus-visible .ring-sweep { animation-play-state: running; }
+.cta:hover { transform: scale(1.05); box-shadow: 0 0 50px 10px rgba(249, 115, 22, .45); }
+.cta-row { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 14px; }
+.cta-disc {
+  flex: none; display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 9999px;
+  background: linear-gradient(to bottom, var(--orange-400), var(--orange-600));
+  box-shadow: 0 10px 15px -3px rgba(249, 115, 22, .3), 0 0 0 1px rgba(255, 255, 255, .2);
+  transition: transform .3s;
+}
+.cta:hover .cta-disc { transform: scale(1.1); }
+.cta-label { flex: 1; text-align: left; white-space: nowrap; font-size: 1rem; font-weight: 500; letter-spacing: -.025em; color: rgba(255, 255, 255, .95); }
+.cta-chip {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 9999px;
+  background: rgba(255, 255, 255, .1); color: rgba(255, 255, 255, .8);
+  transition: transform .15s, color .15s;
+}
+.cta:hover .cta-chip { transform: translateX(2px); color: #fff; }
+
+/* ================================================================ topo */
+.top { flex: none; display: flex; align-items: center; gap: 12px; min-height: 68px; padding: 0 24px; border-bottom: 1px solid var(--hairline); }
+.icon-button.top-menu { display: none; }
+.top-title { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 1.125rem; font-weight: 600; letter-spacing: -.025em; }
+.live { flex: none; display: flex; align-items: center; gap: 8px; }
+.live-dot { width: 8px; height: 8px; border-radius: 9999px; background: var(--neutral-600); }
+.live-text { font: 400 10px/1.3 var(--font-mono); color: rgba(255, 255, 255, .8); }
+.live.is-online .live-dot { background: var(--green-400); animation: pulse 2s cubic-bezier(.4, 0, .6, 1) infinite; }
+.live.is-offline .live-dot { background: var(--orange-500); }
+.icon-button {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 8px; color: var(--neutral-400);
+  transition: color .3s, background-color .3s;
+}
+.icon-button:hover { color: #fff; background: var(--glass); }
+
+/* ================================================================ area de rolagem */
+.scroller {
+  position: relative; flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 20px, black calc(100% - 20px), transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 20px, black calc(100% - 20px), transparent);
+}
+.scroller > .column { display: flex; flex-direction: column; min-height: 100%; padding-top: 28px; padding-bottom: 28px; }
+
+/* estado vazio: hero intro + lista de casos */
+.hero { margin: auto 0; }
+.eyebrow { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+.eyebrow i { width: 8px; height: 8px; border-radius: 9999px; background: var(--orange-500); }
+.eyebrow span { font-size: .75rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(249, 115, 22, .8); }
+.hero h1 { margin-bottom: 20px; font-size: clamp(2.75rem, 6vw, 4.5rem); line-height: .9; font-weight: 500; letter-spacing: -.05em; }
+.hero h1 span { color: transparent; -webkit-background-clip: text; background-clip: text; background-image: linear-gradient(to right, #fff, var(--neutral-200), var(--neutral-500)); }
+.hero-lead { max-width: 32rem; font-size: 1.125rem; line-height: 1.625; font-weight: 500; color: var(--white-60); }
+.suggestions { margin-top: 32px; border-top: 1px solid var(--hairline); }
+.suggestion {
+  display: grid; grid-template-columns: 104px minmax(0, 1fr) 24px; gap: 16px; align-items: center;
+  width: 100%; padding: 16px 8px; text-align: left;
+  border-bottom: 1px solid var(--hairline);
+  transition: background-color .3s;
+}
+.suggestion:hover { background: rgba(255, 255, 255, .02); }
+.suggestion-label { font-size: .75rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--neutral-500); transition: color .15s; }
+.suggestion-name { display: flex; align-items: center; gap: 12px; min-width: 0; font-size: 1rem; font-weight: 600; letter-spacing: -.025em; }
+.suggestion-name svg { flex: none; opacity: .8; transition: opacity .15s; }
+.suggestion-go { width: 24px; height: 24px; color: var(--neutral-600); transition: color .15s; }
+.suggestion:hover .suggestion-label, .suggestion:hover .suggestion-go { color: #fff; }
+.suggestion:hover .suggestion-name svg { opacity: 1; }
+
+/* ================================================================ mensagens */
+.thread { display: flex; flex-direction: column; gap: 36px; }
+.message-user { display: flex; justify-content: flex-end; }
+.bubble-wrap { position: relative; max-width: min(80%, 560px); }
+.bubble-halo {
+  position: absolute; inset: -4px; border-radius: 16px;
+  background: linear-gradient(to right, var(--orange-600), var(--amber-600));
+  filter: blur(8px); opacity: .2;
+  transition: opacity 1s;
+}
+.bubble-wrap:hover .bubble-halo { opacity: .4; transition-duration: .2s; }
+.bubble {
+  position: relative; padding: 14px 18px; border-radius: 12px;
+  background: linear-gradient(to bottom, var(--orange-400), var(--orange-600));
+  box-shadow: var(--shadow-2xl); color: #000;
+  font-size: 1rem; font-weight: 600; line-height: 1.375; letter-spacing: -.025em;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  transition: transform .3s;
+}
+.bubble-wrap:hover .bubble { transform: translateY(-4px); }
+
+.assistant-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.assistant-name { font-size: 1.25rem; font-weight: 700; letter-spacing: -.025em; line-height: 1; }
+.assistant-star { color: var(--orange-500); margin-left: -4px; }
+.message-actions { display: flex; gap: 4px; margin-top: 10px; margin-left: -8px; }
+.action {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 6px;
+  font-size: .75rem; font-weight: 500; color: var(--neutral-500);
+  transition: color .3s, background-color .3s;
+}
+.action:hover { color: #fff; background: var(--glass); }
+.action.is-done { color: var(--orange-500); }
+
+/* notice: erros e interrupcoes ficam em vidro, dentro da paleta do sistema */
+.notice {
+  position: relative; display: flex; gap: 12px; padding: 14px 16px; border-radius: 12px;
+  background: var(--glass); border: 1px solid var(--card-edge);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.notice > svg { flex: none; margin-top: 2px; color: var(--orange-400); }
+.notice strong { display: block; font-size: .875rem; font-weight: 600; color: #fff; }
+.notice p { margin-top: 4px; font-size: .875rem; line-height: 1.625; color: var(--neutral-300); }
+.notice code { font: .8125rem var(--font-mono); color: #fff; }
+.notice .action { margin: 8px 0 0 -8px; color: var(--orange-400); }
+
+/* conteudo em markdown */
+.markdown { font-size: .9375rem; line-height: 1.7; color: var(--neutral-300); overflow-wrap: anywhere; }
+.markdown > * + * { margin-top: 14px; }
+.markdown.reveal > * { animation: fadeSlideIn .7s var(--ease-enter) calc(min(var(--order), 8) * 70ms) backwards; }
+.markdown strong { font-weight: 500; color: #fff; }
+.markdown del { color: var(--neutral-500); }
+.markdown a { color: var(--orange-400); text-decoration: underline; text-decoration-color: rgba(251, 146, 60, .4); text-underline-offset: 3px; transition: color .3s; }
+.markdown a:hover { color: #fff; }
+.markdown h2, .markdown h3, .markdown h4, .markdown h5, .markdown h6 { color: #fff; font-weight: 500; }
+.markdown * + h2, .markdown * + h3, .markdown * + h4 { margin-top: 26px; }
+.markdown h2 { font-size: 1.75rem; line-height: 1.15; letter-spacing: -.05em; }
+.markdown h3 { font-size: 1.3125rem; line-height: 1.25; letter-spacing: -.025em; }
+.markdown h4, .markdown h5, .markdown h6 { font-size: 1rem; font-weight: 600; line-height: 1.4; letter-spacing: -.025em; }
+.markdown ul, .markdown ol { padding-left: 22px; }
+.markdown li + li { margin-top: 6px; }
+.markdown li > ul, .markdown li > ol { margin-top: 6px; }
+.markdown li::marker { color: var(--orange-500); }
+.markdown ol > li::marker { font: 500 .8125rem var(--font-mono); color: var(--orange-400); }
+.markdown blockquote { padding: 2px 0 2px 16px; border-left: 1px dashed rgba(249, 115, 22, .4); color: var(--white-60); }
+.markdown hr { border: 0; border-top: 1px solid var(--hairline); }
+.markdown :not(pre) > code {
+  padding: 2px 6px; border-radius: 4px;
+  background: var(--glass); border: 1px solid var(--card-edge);
+  font: .8125rem var(--font-mono); color: #fff;
+}
+.table-wrap { overflow-x: auto; scrollbar-width: thin; scrollbar-color: var(--neutral-600) transparent; }
+.markdown table { width: 100%; border-collapse: collapse; font-size: .875rem; overflow-wrap: normal; }
+.markdown th { padding: 8px 16px 8px 0; text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--neutral-500); border-bottom: 1px solid var(--card-edge); }
+.markdown td { padding: 10px 16px 10px 0; border-bottom: 1px solid var(--hairline); }
+.code { overflow: hidden; border-radius: 12px; background: var(--screen); border: 1px solid var(--bezel); box-shadow: var(--shadow-2xl); }
+.code-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 4px 14px; border-bottom: 1px solid var(--hairline); }
+.code-lang { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--neutral-500); }
+.code pre { overflow-x: auto; padding: 14px; scrollbar-width: thin; scrollbar-color: var(--neutral-600) transparent; }
+.code code { font: .8125rem/1.65 var(--font-mono); color: var(--neutral-200); white-space: pre; overflow-wrap: normal; }
+
+/* ================================================================ campo de mensagem */
+.dock { flex: none; position: relative; padding-bottom: 14px; }
+.jump {
+  position: absolute; top: -52px; left: 50%; margin-left: -20px; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 9999px;
+  background: rgba(10, 10, 10, .86); border: 1px solid var(--card-edge);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  color: #fff; opacity: 0; pointer-events: none; transform: translateY(6px);
+  transition: opacity .3s, transform .3s, background-color .3s;
+}
+.jump.is-visible { opacity: 1; pointer-events: auto; transform: none; }
+.jump:hover { background: rgba(38, 38, 38, .9); }
+.composer {
+  position: relative; isolation: isolate; overflow: hidden; border-radius: 28px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0), rgba(255, 255, 255, .05));
+  box-shadow: 0 0 25px rgba(249, 115, 22, .3), 0 8px 40px rgba(249, 115, 22, .15);
+  transition: box-shadow .3s;
+}
+.composer .ring { opacity: .55; transition: opacity .3s; }
+.composer:focus-within .ring, .composer.is-busy .ring { opacity: 1; }
+.composer:focus-within { box-shadow: 0 0 40px 4px rgba(249, 115, 22, .3), 0 8px 40px rgba(249, 115, 22, .15); }
+.composer-row { position: relative; z-index: 1; display: flex; align-items: flex-end; gap: 12px; padding: 7px 7px 7px 22px; }
+.composer textarea {
+  flex: 1; min-width: 0; max-height: 200px; padding: 10px 0; resize: none;
+  background: none; border: 0; outline: 0; scrollbar-width: none;
+  font-size: 1rem; line-height: 1.5; color: #fff;
+}
+.composer textarea::placeholder { color: var(--neutral-500); opacity: 1; }
+.send { flex: none; }
+.send:focus-visible { outline-offset: 3px; }
+.send:disabled { cursor: not-allowed; filter: saturate(.35) brightness(.6); }
+.send:disabled .points_wrapper { display: none; }
+.dock-hint { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; font-size: .75rem; font-weight: 500; color: var(--neutral-500); }
+.dock-hint svg { color: var(--orange-500); }
+kbd { font: inherit; color: var(--neutral-400); }
+
+/* ================================================================ entrar e criar conta */
+.auth { position: fixed; inset: 0; z-index: 5; overflow-y: auto; scrollbar-width: none; display: flex; padding: 24px 16px; }
+.auth-wrap { position: relative; width: 100%; max-width: 420px; margin: auto; }
+.auth-glow { position: absolute; inset: -32px; z-index: -1; border-radius: 9999px; background: rgba(249, 115, 22, .2); filter: blur(64px); opacity: .5; pointer-events: none; }
+.auth-card {
+  position: relative; display: flex; flex-direction: column;
+  padding: 28px; border-radius: 14px; border: 1px solid var(--hairline);
+  background: rgba(10, 10, 10, .86);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .5);
+}
+.auth-card h1 { margin: 28px 0 26px; font-size: 3rem; line-height: .95; font-weight: 500; letter-spacing: -.05em; }
+.auth-card h1 span { color: transparent; -webkit-background-clip: text; background-clip: text; background-image: linear-gradient(to right, #fff, var(--neutral-200), var(--neutral-500)); }
+.field { display: block; margin-bottom: 16px; }
+.field span { display: block; margin-bottom: 8px; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--neutral-400); }
+.field input {
+  display: block; width: 100%; padding: 11px 14px; border-radius: 8px;
+  background: var(--glass); border: 1px solid var(--card-edge); outline: 0;
+  font-size: 1rem; line-height: 1.5; color: #fff;
+  transition: border-color .3s, box-shadow .3s;
+}
+.field input:focus { border-color: rgba(249, 115, 22, .6); box-shadow: 0 0 15px rgba(249, 115, 22, .2); }
+.field input:-webkit-autofill { -webkit-text-fill-color: #fff; caret-color: #fff; box-shadow: inset 0 0 0 100px #171717; }
+.auth-hint { margin: -4px 0 16px; font-size: .75rem; line-height: 1.5; color: var(--neutral-500); }
+.auth-error { margin: -4px 0 16px; font-size: .875rem; line-height: 1.5; color: var(--orange-400); }
+.auth-submit { width: 100%; }
+.auth-submit:disabled { cursor: wait; filter: saturate(.35) brightness(.6); }
+.auth-switch { margin-top: 18px; text-align: center; font-size: .875rem; color: var(--neutral-500); }
+.auth-switch button { font-weight: 500; color: var(--orange-400); transition: color .3s; }
+.auth-switch button:hover { color: #fff; }
+
+/* ================================================================ telas estreitas */
+.scrim { display: none; }
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 30;
+    width: min(320px, 86vw); padding: 12px;
+    visibility: hidden; transform: translateX(-105%);
+    transition: transform .3s var(--ease-enter), visibility 0s .3s;
+  }
+  .side.is-open { visibility: visible; transform: none; transition: transform .3s var(--ease-enter); }
+  .scrim {
+    display: block; position: fixed; inset: 0; z-index: 20;
+    background: rgba(0, 0, 0, .6); opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  .scrim.is-open { opacity: 1; pointer-events: auto; }
+  .top { padding: 0 12px 0 8px; min-height: 60px; }
+  .icon-button.top-menu { display: flex; }
+  .column { padding: 0 16px; }
+  .send { min-width: 44px; padding: 10px 14px; }
+  .send-label { display: none; }
+  .suggestion { grid-template-columns: minmax(0, 1fr) 24px; gap: 6px 12px; padding: 14px 4px; }
+  .suggestion-label { grid-column: 1 / -1; }
+}
+@media (hover: none) { .step-delete { opacity: .7; } }
+@media (max-width: 480px) {
+  .hero-lead { font-size: 1rem; }
+  .auth-card { padding: 24px 20px; }
+  .bubble-wrap { max-width: 88%; }
+  .dock-hint { display: none; }
+  .dock { padding-bottom: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .beam, .ring-sweep, .live-dot, .points_wrapper .point { animation: none !important; }
+  .beam, .points_wrapper { display: none; }
+  .enter, .markdown.reveal > * { animation: none; }
+  .cta:hover { transform: none; }
+  .bubble-wrap:hover .bubble { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- fundo fixo do Lumina: aura WebGL, paisagem e grade com feixes -->
+<div class="aura" aria-hidden="true"><div><div data-us-project="ILgOO23w4wEyPQOKyLO4"></div></div></div>
+<div class="landscape" aria-hidden="true"><img alt="" src="lumina-video-design-system/assets/overview/assets/2b5079f4-4ddd-433b-a936-fc8f7d_7da21e998877.webp"></div>
+<div class="beam-grid" aria-hidden="true">
+  <div class="beam-col"><span>01</span></div>
+  <div class="beam-col"><div class="beam beam-60 animate-beam-1" style="height:16rem"></div><span>02</span></div>
+  <div class="beam-col">
+    <div class="beam beam-80 animate-beam-2" style="height:24rem"></div>
+    <div class="beam-guide"></div>
+    <div class="beam beam-100 beam-center animate-beam-1" style="height:16rem;animation-delay:1.5s"></div>
+    <span style="left:50%;transform:translateX(-50%);color:rgba(249,115,22,.3)">03</span>
+  </div>
+  <div class="beam-col"><div class="beam beam-60 animate-beam-3" style="height:12rem"></div><span>04</span></div>
+  <div class="beam-col"><span>05</span></div>
+</div>
+
+<section class="auth" id="auth" hidden>
+  <div class="auth-wrap enter">
+    <div class="auth-glow"></div>
+    <form class="auth-card" id="authForm" novalidate style="--border-gradient:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0));--border-radius-before:14px">
+      <div class="brand">
+        <span class="logo" style="--border-gradient:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));--border-radius-before:9999px">
+          <span class="logo-core" style="--border-gradient:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,0));--border-radius-before:9999px"></span>
+        </span>
+        Lumina
+      </div>
+      <h1 id="authTitle"></h1>
+      <label class="field"><span>Usuário</span><input id="authUsername" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="32"></label>
+      <label class="field"><span>Senha</span><input id="authPassword" name="password" type="password" maxlength="128"></label>
+      <p class="auth-hint" id="authHint">Usuário com 3 a 32 letras, números, ponto, hífen ou sublinhado. Senha com pelo menos 8 caracteres.</p>
+      <p class="auth-error" id="authError" role="alert" hidden></p>
+      <button class="button-custom auth-submit" id="authSubmit" type="submit">
+        <div class="points_wrapper"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></div>
+        <span class="inner">
+          <span id="authSubmitLabel"></span>
+          <svg class="icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </span>
+      </button>
+      <p class="auth-switch"><span id="authSwitchText"></span> <button id="authSwitch" type="button"></button></p>
+    </form>
+  </div>
+</section>
+
+<div class="app" id="app" hidden>
+  <aside class="side" id="side" aria-label="Conversas">
+    <div class="side-plate">
+      <div class="side-head">
+        <div class="brand">
+          <span class="logo" style="--border-gradient:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));--border-radius-before:9999px">
+            <span class="logo-core" style="--border-gradient:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,0));--border-radius-before:9999px"></span>
+          </span>
+          Lumina
+        </div>
+        <button class="icon-button top-menu" id="closeSide" type="button" aria-label="Fechar conversas"><i data-lucide="x" class="icon-20"></i></button>
+      </div>
+      <div class="side-new">
+        <button class="cta" id="newChat" type="button">
+          <span class="ring"><span class="ring-sweep"></span></span>
+          <span class="plate"></span>
+          <span class="cta-row">
+            <span class="cta-disc">
+              <svg viewBox="0 0 24 24" width="14" height="14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3.845 3.845a2.883 2.883 0 0 0 0 4.077L5.432 9.51c.012-.014.555.503.568.49l4-4c.013-.013-.504-.556-.49-.568L7.922 3.845a2.883 2.883 0 0 0-4.077 0m1.288 11.462a.483.483 0 0 1 .9 0l.157.4a.48.48 0 0 0 .272.273l.398.157a.486.486 0 0 1 0 .903l-.398.158a.48.48 0 0 0-.272.273l-.157.4a.483.483 0 0 1-.9 0l-.157-.4a.48.48 0 0 0-.272-.273l-.398-.158a.486.486 0 0 1 0-.903l.398-.157a.48.48 0 0 0 .272-.274z" fill="#ffffff" opacity=".5"/><path d="M19.967 9.13a.483.483 0 0 1 .9 0l.156.399c.05.125.148.224.273.273l.398.158a.486.486 0 0 1 0 .902l-.398.158a.5.5 0 0 0-.273.273l-.156.4a.483.483 0 0 1-.9 0l-.157-.4a.5.5 0 0 0-.272-.273l-.398-.158a.486.486 0 0 1 0-.902l.398-.158a.5.5 0 0 0 .272-.273z" fill="#ffffff" opacity=".2"/><path d="M16.1 2.307a.483.483 0 0 1 .9 0l.43 1.095a.48.48 0 0 0 .272.274l1.091.432a.486.486 0 0 1 0 .903l-1.09.432a.5.5 0 0 0-.273.273L17 6.81a.483.483 0 0 1-.9 0l-.43-1.095a.5.5 0 0 0-.273-.273l-1.09-.432a.486.486 0 0 1 0-.903l1.09-.432a.5.5 0 0 0 .273-.274z" fill="#ffffff" opacity=".7"/><path d="M10.568 6.49c-.012.014-.555-.503-.568-.49l-4 4c-.013.013.504.556.49.568l9.588 9.587a2.883 2.883 0 1 0 4.078-4.077z" fill="#ffffff"/></svg>
+            </span>
+            <span class="cta-label">Nova conversa</span>
+            <span class="cta-chip"><i data-lucide="plus" class="icon-12"></i></span>
+          </span>
+        </button>
+      </div>
+      <div class="side-label"><span>Conversas</span><b id="conversationCount"></b></div>
+      <ul class="conversations" id="conversations"></ul>
+      <div class="side-foot">
+        <div class="account">
+          <span class="account-avatar" id="accountInitial" aria-hidden="true"></span>
+          <span class="account-name" id="accountName"></span>
+          <button class="icon-button" id="logout" type="button" aria-label="Sair da conta"><i data-lucide="log-out" class="icon-16"></i></button>
+        </div>
+        As conversas ficam salvas neste navegador.
+      </div>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="chat">
+    <header class="top">
+      <button class="icon-button top-menu" id="openSide" type="button" aria-label="Abrir conversas"><i data-lucide="menu" class="icon-20"></i></button>
+      <h2 class="top-title" id="topTitle">Nova conversa</h2>
+      <div class="live" id="live" role="status"><span class="live-dot"></span><span class="live-text" id="liveText">Verificando...</span></div>
+    </header>
+
+    <div class="scroller" id="scroller">
+      <div class="column">
+        <section class="hero" id="hero">
+          <div class="eyebrow enter" style="--delay:.1s"><i></i><span>Lumina Chat</span></div>
+          <h1 class="enter" style="--delay:.2s">Sobre o que<br><span>vamos conversar?</span></h1>
+          <p class="hero-lead enter" style="--delay:.3s">Pergunte, peça um rascunho ou cole um trecho de código.</p>
+          <div class="suggestions enter" style="--delay:.4s">
+            <button class="suggestion" type="button" data-prompt="Explique como funciona uma API REST, com um exemplo simples.">
+              <span class="suggestion-label">Explicar</span>
+              <span class="suggestion-name"><i data-lucide="lightbulb" class="icon-20"></i>Como funciona uma API REST</span>
+              <svg class="suggestion-go" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.1" r="10"/><path d="M10 16L14 12L10 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
+            </button>
+            <button class="suggestion" type="button" data-prompt="Escreva uma função em Python que valide um CPF e explique cada passo.">
+              <span class="suggestion-label">Programar</span>
+              <span class="suggestion-name"><i data-lucide="code" class="icon-20"></i>Função Python que valida CPF</span>
+              <svg class="suggestion-go" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.1" r="10"/><path d="M10 16L14 12L10 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
+            </button>
+            <button class="suggestion" type="button" data-prompt="Monte um plano de estudos de 4 semanas para aprender FastAPI.">
+              <span class="suggestion-label">Planejar</span>
+              <span class="suggestion-name"><i data-lucide="pen-line" class="icon-20"></i>Plano de 4 semanas de FastAPI</span>
+              <svg class="suggestion-go" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.1" r="10"/><path d="M10 16L14 12L10 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
+            </button>
+          </div>
+        </section>
+        <div class="thread" id="thread" role="log" aria-live="polite" aria-label="Mensagens" hidden></div>
+      </div>
+    </div>
+
+    <div class="dock">
+      <button class="jump" id="jump" type="button" aria-label="Ir para a mensagem mais recente"><i data-lucide="arrow-down" class="icon-16"></i></button>
+      <div class="column">
+        <form class="composer" id="composer">
+          <div class="ring"><div class="ring-sweep"></div></div>
+          <div class="plate"></div>
+          <div class="composer-row">
+            <textarea id="input" rows="1" placeholder="Envie uma mensagem para a Lumina" aria-label="Mensagem"></textarea>
+            <button class="button-custom send" id="send" type="submit" disabled>
+              <div class="points_wrapper"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></div>
+              <span class="inner">
+                <span class="send-label" id="sendLabel">Enviar</span>
+                <svg class="icon" id="sendIcon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </span>
+            </button>
+          </div>
+        </form>
+        <div class="dock-hint"><i data-lucide="check" class="icon-14"></i><span><kbd>Enter</kbd> envia · <kbd>Shift + Enter</kbd> quebra a linha</span></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="lumina-video-design-system/assets/overview/assets/lucide_latest_2eebd0ebe8c2.js"></script>
+<script>
+'use strict';
+
+const API_URL = 'http://127.0.0.1:8000';  // endereco do backend FastAPI
+const HISTORY_MESSAGES = 12;              // mensagens anteriores enviadas como contexto; 0 desliga
+const HISTORY_MESSAGE_CHARS = 1500;       // limite de cada mensagem anterior no contexto
+const STORAGE_KEY = 'lumina.chat.v1';
+const AUTH_KEY = 'lumina.auth.v1';
+const STATUS_INTERVAL = 20000;
+const AURA_SCRIPT = 'lumina-video-design-system/assets/overview/assets/js/unicorn-studio.js';
+
+const $ = (id) => document.getElementById(id);
+const scroller = $('scroller'), thread = $('thread'), hero = $('hero');
+const input = $('input'), composer = $('composer'), sendButton = $('send');
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+const state = { auth: null, authMode: 'login', conversations: [], activeId: null, pending: null };
+
+/* ---------------------------------------------------------------- persistencia */
+const conversationsKey = () => `${STORAGE_KEY}.${state.auth.username}`;
+
+function load() {
+  state.conversations = [];
+  state.activeId = null;
+  try {
+    let raw = localStorage.getItem(conversationsKey());
+    if (raw === null) {
+      /* conversas de antes do login passam para a primeira conta que entrar neste navegador */
+      raw = localStorage.getItem(STORAGE_KEY);
+      if (raw !== null) {
+        localStorage.setItem(conversationsKey(), raw);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+    const saved = JSON.parse(raw);
+    if (saved && Array.isArray(saved.conversations)) {
+      state.conversations = saved.conversations;
+      if (state.conversations.some((c) => c.id === saved.activeId)) state.activeId = saved.activeId;
+    }
+  } catch (e) { /* sem storage a conversa vale so para esta aba */ }
+}
+
+function save() {
+  try {
+    localStorage.setItem(conversationsKey(), JSON.stringify({ conversations: state.conversations, activeId: state.activeId }));
+  } catch (e) { /* idem */ }
+}
+
+const activeConversation = () => state.conversations.find((c) => c.id === state.activeId) || null;
+
+function createConversation(firstMessage) {
+  const line = firstMessage.split('\n')[0].trim();
+  const conversation = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    title: line.length > 48 ? line.slice(0, 47).trimEnd() + '…' : line,
+    updated: Date.now(),
+    messages: [],
+  };
+  state.conversations.push(conversation);
+  state.activeId = conversation.id;
+  return conversation;
+}
+
+/* ---------------------------------------------------------------- markdown */
+/* tudo e escapado antes de virar HTML: nada que vem do modelo chega ao DOM como marcacao */
+const escapeHtml = (text) => text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function renderInline(raw) {
+  const stash = [];
+  const hold = (html) => `\u0000${stash.push(html) - 1}\u0000`;
+  let text = raw.replace(/`([^`\n]+)`/g, (_, code) => hold(`<code>${escapeHtml(code)}</code>`));
+  text = escapeHtml(text)
+    .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, label, url) => hold(`<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`))
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^\w])__(?=\S)(.+?)__(?!\w)/g, '$1<strong>$2</strong>')
+    .replace(/(^|[^*\w])\*(?=\S)([^*\n]+?)\*(?![*\w])/g, '$1<em>$2</em>')
+    .replace(/~~(.+?)~~/g, '<del>$1</del>');
+  while (text.includes('\u0000')) text = text.replace(/\u0000(\d+)\u0000/g, (_, i) => stash[i]);
+  return text;
+}
+
+const FENCE = /^\s*(`{3,}|~{3,})\s*([\w+#.-]*)/;
+const HEADING = /^(#{1,6})\s+(.*?)\s*#*\s*$/;
+const RULE = /^\s*([-*_])(\s*\1){2,}\s*$/;
+const LIST_ITEM = /^(\s*)([-*+]|\d+[.)])\s+(.*)$/;
+const QUOTE = /^\s*>\s?/;
+const TABLE_DIVIDER = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
+
+const isTableStart = (lines, i) => lines[i].includes('|') && i + 1 < lines.length && lines[i + 1].includes('-') && lines[i + 1].includes('|') && TABLE_DIVIDER.test(lines[i + 1]);
+const isBlockStart = (lines, i) => FENCE.test(lines[i]) || HEADING.test(lines[i]) || RULE.test(lines[i]) || LIST_ITEM.test(lines[i]) || QUOTE.test(lines[i]) || isTableStart(lines, i);
+const tableCells = (line) => line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim());
+
+function renderCode(language, code) {
+  return `<div class="code"><div class="code-head"><span class="code-lang">${escapeHtml(language || 'código')}</span>`
+    + `<button class="action" type="button" data-action="copy-code"><i data-lucide="copy" class="icon-12"></i><span>Copiar</span></button></div>`
+    + `<pre><code>${escapeHtml(code)}</code></pre></div>`;
+}
+
+function renderList(lines, start) {
+  const first = lines[start].match(LIST_ITEM);
+  const base = first[1].length, ordered = /\d/.test(first[2]);
+  const items = [];
+  let i = start;
+  while (i < lines.length) {
+    const match = lines[i].match(LIST_ITEM);
+    if (!match) {
+      if (!lines[i].trim()) {
+        let next = i + 1;
+        while (next < lines.length && !lines[next].trim()) next++;
+        const following = next < lines.length && lines[next].match(LIST_ITEM);
+        if (!following || following[1].length < base) break;
+        i = next;
+        continue;
+      }
+      if (/^\s{2,}/.test(lines[i]) && items.length) {
+        items[items.length - 1].text += ' ' + lines[i].trim();
+        i++;
+        continue;
+      }
+      break;
+    }
+    const indent = match[1].length;
+    if (indent < base) break;
+    if (indent >= base + 2 && items.length) {
+      const nested = renderList(lines, i);
+      items[items.length - 1].children += nested.html;
+      i = nested.next;
+      continue;
+    }
+    if (/\d/.test(match[2]) !== ordered) break;
+    items.push({ text: match[3], children: '' });
+    i++;
+  }
+  const tag = ordered ? 'ol' : 'ul';
+  const startNumber = ordered ? parseInt(first[2], 10) : 1;
+  const startAttr = startNumber > 1 ? ` start="${startNumber}"` : '';
+  const html = `<${tag}${startAttr}>${items.map((item) => `<li>${renderInline(item.text)}${item.children}</li>`).join('')}</${tag}>`;
+  return { html, next: i };
+}
+
+function renderMarkdown(source) {
+  const lines = source.replace(/\u0000/g, '').replace(/\r\n?/g, '\n').split('\n');
+  const blocks = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line.trim()) { i++; continue; }
+
+    const fence = line.match(FENCE);
+    if (fence) {
+      const code = [];
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith(fence[1])) code.push(lines[i++]);
+      i++;
+      blocks.push(renderCode(fence[2], code.join('\n')));
+      continue;
+    }
+
+    const heading = line.match(HEADING);
+    if (heading) {
+      const tag = 'h' + Math.min(heading[1].length + 1, 6);
+      blocks.push(`<${tag}>${renderInline(heading[2])}</${tag}>`);
+      i++;
+      continue;
+    }
+
+    if (RULE.test(line)) { blocks.push('<hr>'); i++; continue; }
+
+    if (isTableStart(lines, i)) {
+      const head = tableCells(line);
+      const rows = [];
+      i += 2;
+      while (i < lines.length && lines[i].includes('|')) rows.push(tableCells(lines[i++]));
+      const headHtml = head.map((cell) => `<th>${renderInline(cell)}</th>`).join('');
+      const rowsHtml = rows.map((row) => `<tr>${row.map((cell) => `<td>${renderInline(cell)}</td>`).join('')}</tr>`).join('');
+      blocks.push(`<div class="table-wrap"><table><thead><tr>${headHtml}</tr></thead><tbody>${rowsHtml}</tbody></table></div>`);
+      continue;
+    }
+
+    if (QUOTE.test(line)) {
+      const quote = [];
+      while (i < lines.length && QUOTE.test(lines[i])) quote.push(lines[i++].replace(QUOTE, ''));
+      blocks.push(`<blockquote>${renderMarkdown(quote.join('\n'))}</blockquote>`);
+      continue;
+    }
+
+    if (LIST_ITEM.test(line)) {
+      const list = renderList(lines, i);
+      blocks.push(list.html);
+      i = list.next;
+      continue;
+    }
+
+    const paragraph = [line];
+    i++;
+    while (i < lines.length && lines[i].trim() && !isBlockStart(lines, i)) paragraph.push(lines[i++]);
+    blocks.push(`<p>${paragraph.map((text) => renderInline(text.trim())).join('<br>')}</p>`);
+  }
+  return blocks.join('');
+}
+
+/* ---------------------------------------------------------------- mensagens */
+const paintIcons = () => lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
+
+const ASSISTANT_HEAD = `<div class="assistant-head">
+  <span class="logo logo-small" style="--border-gradient:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));--border-radius-before:9999px"><span class="logo-core"></span></span>
+  <span class="assistant-name font-instrument-serif">Lumina</span>
+  <svg class="assistant-star" height="14" width="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z" fill="currentColor"/></svg>
+</div>`;
+
+function userElement(message) {
+  const element = document.createElement('article');
+  element.className = 'message-user';
+  element.innerHTML = `<div class="bubble-wrap"><div class="bubble-halo"></div>
+    <div class="bubble" style="--border-gradient:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0));--border-radius-before:12px"></div></div>`;
+  element.querySelector('.bubble').textContent = message.text;
+  return element;
+}
+
+function assistantElement(message, reveal) {
+  const element = document.createElement('article');
+  element.className = 'message-assistant';
+  element.innerHTML = `${ASSISTANT_HEAD}<div class="markdown${reveal ? ' reveal' : ''}">${renderMarkdown(message.text)}</div>
+    <div class="message-actions"><button class="action" type="button" data-action="copy-message"><i data-lucide="copy" class="icon-12"></i><span>Copiar</span></button></div>`;
+  [...element.querySelector('.markdown').children].forEach((block, index) => block.style.setProperty('--order', index));
+  element.dataset.source = message.text;
+  return element;
+}
+
+function noticeElement(message) {
+  const element = document.createElement('article');
+  element.className = 'message-notice';
+  element.innerHTML = `<div class="notice"><i data-lucide="triangle-alert" class="icon-16"></i><div>
+    <strong></strong><p></p>
+    <button class="action" type="button" data-action="retry"><i data-lucide="rotate-ccw" class="icon-12"></i><span>Tentar novamente</span></button>
+  </div></div>`;
+  element.querySelector('strong').textContent = message.title;
+  element.querySelector('p').textContent = message.detail;
+  return element;
+}
+
+function messageElement(message, animate) {
+  const element = message.role === 'user' ? userElement(message)
+    : message.role === 'assistant' ? assistantElement(message, animate)
+    : noticeElement(message);
+  if (animate && message.role !== 'assistant') {
+    element.classList.add('enter');
+    element.style.animationDuration = '.7s';
+  }
+  return element;
+}
+
+function pendingElement() {
+  const element = document.createElement('article');
+  element.className = 'message-assistant enter';
+  element.style.animationDuration = '.7s';
+  element.innerHTML = `${ASSISTANT_HEAD}<div class="live is-online"><span class="live-dot"></span><span class="live-text">Analisando...</span></div>`;
+  return element;
+}
+
+/* ---------------------------------------------------------------- rolagem */
+const smooth = () => (reducedMotion.matches ? 'auto' : 'smooth');
+const nearBottom = () => scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 96;
+const scrollToEnd = (behavior) => scroller.scrollTo({ top: scroller.scrollHeight, behavior });
+const updateJump = () => $('jump').classList.toggle('is-visible', !thread.hidden && !nearBottom());
+
+/* ---------------------------------------------------------------- telas */
+function renderSidebar() {
+  const list = $('conversations');
+  const ordered = [...state.conversations].sort((a, b) => b.updated - a.updated);
+  $('conversationCount').textContent = ordered.length ? String(ordered.length).padStart(2, '0') : '';
+  if (!ordered.length) {
+    list.innerHTML = '<li class="conversations-empty">Sua primeira conversa aparece aqui.</li>';
+    return;
+  }
+  list.innerHTML = ordered.map((conversation, index) => `<li class="conversation">
+    <button class="step${conversation.id === state.activeId ? ' is-active' : ''}" type="button" data-open="${conversation.id}"
+      ${conversation.id === state.activeId ? 'aria-current="true"' : ''}
+      style="--border-gradient:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,0));--border-radius-before:8px">
+      <span class="step-badge">${String(index + 1).padStart(2, '0')}</span>
+      <span class="step-text">${escapeHtml(conversation.title)}</span>
+    </button>
+    <button class="step-delete" type="button" data-delete="${conversation.id}" aria-label="Excluir conversa: ${escapeHtml(conversation.title)}"><i data-lucide="trash-2" class="icon-14"></i></button>
+  </li>`).join('');
+  paintIcons();
+}
+
+function renderThread() {
+  const conversation = activeConversation();
+  thread.replaceChildren();
+  hero.hidden = !!conversation;
+  thread.hidden = !conversation;
+  $('topTitle').textContent = conversation ? conversation.title : 'Nova conversa';
+  document.title = conversation ? `${conversation.title} · Lumina` : 'Lumina Chat';
+  if (conversation) {
+    conversation.messages.forEach((message) => thread.append(messageElement(message, false)));
+    if (state.pending && state.pending.conversation === conversation) thread.append(state.pending.element);
+    paintIcons();
+    scrollToEnd('auto');
+  } else {
+    scroller.scrollTop = 0;
+  }
+  updateJump();
+}
+
+function appendMessage(conversation, message) {
+  conversation.messages.push(message);
+  conversation.updated = Date.now();
+  save();
+  renderSidebar();
+  if (conversation !== activeConversation()) return null;
+  const element = messageElement(message, true);
+  thread.append(element);
+  paintIcons();
+  return element;
+}
+
+function updateComposer() {
+  const busy = !!state.pending;
+  composer.classList.toggle('is-busy', busy);
+  sendButton.disabled = !busy && !input.value.trim();
+  $('sendLabel').textContent = busy ? 'Parar' : 'Enviar';
+  sendButton.setAttribute('aria-label', busy ? 'Parar resposta' : 'Enviar mensagem');
+  $('sendIcon').innerHTML = busy
+    ? '<rect x="6" y="6" width="12" height="12" rx="2" fill="#fff"/>'
+    : '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>';
+}
+
+function resizeInput() {
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 200) + 'px';
+}
+
+/* ---------------------------------------------------------------- backend */
+/* o endpoint recebe uma unica mensagem e nao guarda historico, entao o contexto vai dentro dela */
+function buildPrompt(conversation) {
+  const turns = conversation.messages.filter((m) => m.role === 'user' || m.role === 'assistant');
+  const current = turns[turns.length - 1].text;
+  const previous = HISTORY_MESSAGES ? turns.slice(0, -1).slice(-HISTORY_MESSAGES) : [];
+  if (!previous.length) return current;
+  const transcript = previous.map((m) => {
+    const text = m.text.length > HISTORY_MESSAGE_CHARS ? m.text.slice(0, HISTORY_MESSAGE_CHARS) + '…' : m.text;
+    return `${m.role === 'user' ? 'Usuário' : 'Assistente'}: ${text}`;
+  }).join('\n\n');
+  return `Histórico recente da conversa, use apenas como contexto:\n\n${transcript}\n\nResponda agora à mensagem atual do usuário:\n${current}`;
+}
+
+function describeFailure(error) {
+  if (error.name === 'AbortError') {
+    return { title: 'Resposta interrompida', detail: 'Você parou esta resposta antes de ela chegar.' };
+  }
+  if (error.status === 401) {
+    return { title: 'Sua sessão expirou', detail: 'Depois de entrar de novo, use o botão abaixo para reenviar a mensagem.' };
+  }
+  if (error.status === 422) {
+    return { title: 'O backend recusou a mensagem', detail: 'O formato enviado não é o que o endpoint /send_message espera (erro 422).' };
+  }
+  if (error.status) {
+    return { title: `O backend respondeu com erro ${error.status}`, detail: 'A chamada ao modelo falhou. Veja o terminal do backend: pode ser a chave do OpenRouter ou o limite do modelo gratuito.' };
+  }
+  if (error.empty) {
+    return { title: 'O modelo devolveu uma resposta vazia', detail: 'Isso acontece às vezes com o roteador de modelos gratuitos. Tente novamente.' };
+  }
+  return { title: 'Não consegui falar com o backend', detail: `Confirme que ele está rodando em ${API_URL} e que o CORS permite esta página.` };
+}
+
+async function requestReply(conversation) {
+  const owner = state.auth;
+  const controller = new AbortController();
+  const element = pendingElement();
+  const startedAt = Date.now();
+  const label = element.querySelector('.live-text');
+  const timer = setInterval(() => {
+    label.textContent = `Analisando... ${Math.round((Date.now() - startedAt) / 1000)}s`;
+  }, 1000);
+  state.pending = { conversation, controller, element };
+  updateComposer();
+  if (conversation === activeConversation()) {
+    thread.append(element);
+    scrollToEnd(smooth());
+  }
+
+  let reply = null, failure = null, sessionExpired = false;
+  try {
+    const response = await fetch(`${API_URL}/send_message`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify({ message: buildPrompt(conversation) }),
+      signal: controller.signal,
+    });
+    if (!response.ok) throw Object.assign(new Error('http'), { status: response.status });
+    const data = await response.json();
+    if (typeof data.response !== 'string' || !data.response.trim()) throw Object.assign(new Error('empty'), { empty: true });
+    reply = data.response;
+    setStatus(true);
+  } catch (error) {
+    failure = describeFailure(error);
+    sessionExpired = error.status === 401;
+    if (error.name !== 'AbortError' && !error.status && !error.empty) setStatus(false);
+  }
+
+  clearInterval(timer);
+  element.remove();
+  if (state.auth !== owner) return;  // saiu da conta durante a espera
+  state.pending = null;
+  updateComposer();
+
+  const followReply = nearBottom();
+  const added = appendMessage(conversation, reply ? { role: 'assistant', text: reply } : { role: 'error', ...failure });
+  if (added && followReply) {
+    /* resposta longa: leva ao inicio dela, nao ao fim */
+    scroller.scrollTo({ top: Math.max(added.offsetTop - 16, 0), behavior: smooth() });
+  }
+  updateJump();
+  if (sessionExpired) endSession('Sua sessão expirou. Entre novamente.');
+}
+
+function send(text) {
+  const message = text.trim();
+  if (!message || state.pending) return;
+  let conversation = activeConversation();
+  const isNew = !conversation;
+  if (isNew) conversation = createConversation(message);
+  input.value = '';
+  resizeInput();
+  if (isNew) renderThread();
+  appendMessage(conversation, { role: 'user', text: message });
+  requestReply(conversation);
+}
+
+function retry() {
+  const conversation = activeConversation();
+  if (!conversation || state.pending) return;
+  const last = conversation.messages[conversation.messages.length - 1];
+  if (last && last.role === 'error') {
+    conversation.messages.pop();
+    thread.lastElementChild.remove();
+    save();
+  }
+  requestReply(conversation);
+}
+
+async function setStatusFromBackend() {
+  try {
+    const response = await fetch(`${API_URL}/openapi.json`, { cache: 'no-store' });
+    setStatus(response.ok);
+  } catch (error) {
+    setStatus(false);
+  }
+}
+
+function setStatus(online) {
+  const live = $('live');
+  live.classList.toggle('is-online', online);
+  live.classList.toggle('is-offline', !online);
+  $('liveText').textContent = online ? 'Conectado' : 'Backend offline';
+}
+
+/* ---------------------------------------------------------------- conta */
+const authHeaders = () => ({ Authorization: `Bearer ${state.auth.token}` });
+
+const AUTH_MODES = {
+  login: { title: 'Entre na<br><span>sua conta</span>', submit: 'Entrar', question: 'Ainda não tem conta?', link: 'Criar conta', password: 'current-password' },
+  register: { title: 'Crie sua<br><span>conta</span>', submit: 'Criar conta', question: 'Já tem conta?', link: 'Entrar', password: 'new-password' },
+};
+
+function readAuth() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(AUTH_KEY));
+    return saved && saved.token && saved.username ? saved : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function writeAuth() {
+  try {
+    if (state.auth) localStorage.setItem(AUTH_KEY, JSON.stringify(state.auth));
+    else localStorage.removeItem(AUTH_KEY);
+  } catch (e) { /* sem storage o login vale so para esta aba */ }
+}
+
+function showAuthError(message) {
+  $('authError').textContent = message;
+  $('authError').hidden = !message;
+}
+
+function setAuthMode(mode) {
+  const texts = AUTH_MODES[mode];
+  state.authMode = mode;
+  $('authTitle').innerHTML = texts.title;
+  $('authSubmitLabel').textContent = texts.submit;
+  $('authSwitchText').textContent = texts.question;
+  $('authSwitch').textContent = texts.link;
+  $('authPassword').autocomplete = texts.password;
+  $('authHint').hidden = mode !== 'register';
+  showAuthError('');
+}
+
+function showAuth(message = '') {
+  $('app').hidden = true;
+  $('auth').hidden = false;
+  setAuthMode('login');
+  showAuthError(message);
+  $('authPassword').value = '';
+  $('authUsername').focus();
+}
+
+function enterApp() {
+  $('auth').hidden = true;
+  $('app').hidden = false;
+  $('accountName').textContent = state.auth.username;
+  $('accountInitial').textContent = state.auth.username[0].toUpperCase();
+  load();
+  renderSidebar();
+  renderThread();
+  updateComposer();
+  input.focus();
+}
+
+function endSession(message) {
+  if (state.pending) state.pending.controller.abort();
+  state.pending = null;
+  state.auth = null;
+  state.conversations = [];
+  state.activeId = null;
+  writeAuth();
+  input.value = '';
+  resizeInput();
+  closeSidebar();
+  showAuth(message);
+}
+
+function logout() {
+  const headers = authHeaders();
+  endSession();
+  fetch(`${API_URL}/logout`, { method: 'POST', headers }).catch(() => { /* a sessao expira sozinha */ });
+}
+
+/* sem resposta do backend a pessoa continua lendo as conversas; so um 401 encerra a sessao */
+async function verifySession() {
+  const owner = state.auth;
+  try {
+    const response = await fetch(`${API_URL}/me`, { headers: authHeaders() });
+    if (response.status === 401 && state.auth === owner) endSession('Sua sessão expirou. Entre novamente.');
+  } catch (error) { /* offline */ }
+}
+
+function validateCredentials(username, password) {
+  if (state.authMode === 'login') return username && password ? '' : 'Preencha usuário e senha.';
+  if (!/^[A-Za-z0-9._-]{3,32}$/.test(username)) return 'O usuário precisa ter de 3 a 32 letras, números, ponto, hífen ou sublinhado.';
+  if (password.length < 8) return 'A senha precisa ter pelo menos 8 caracteres.';
+  return '';
+}
+
+function describeAuthFailure(status) {
+  if (status === 401) return 'Usuário ou senha incorretos.';
+  if (status === 409) return 'Esse usuário já existe. Escolha outro nome ou entre na conta.';
+  if (status === 422) return 'Confira o usuário e a senha informados.';
+  return `O backend respondeu com erro ${status}. Veja o terminal dele.`;
+}
+
+async function submitAuth(event) {
+  event.preventDefault();
+  const username = $('authUsername').value.trim();
+  const password = $('authPassword').value;
+  const invalid = validateCredentials(username, password);
+  showAuthError(invalid);
+  if (invalid) return;
+
+  const submit = $('authSubmit');
+  submit.disabled = true;
+  $('authSubmitLabel').textContent = 'Aguarde...';
+  try {
+    const response = await fetch(`${API_URL}/${state.authMode}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    if (response.ok) {
+      const data = await response.json();
+      state.auth = { token: data.token, username: data.username };
+      writeAuth();
+      $('authPassword').value = '';
+      enterApp();
+    } else {
+      showAuthError(describeAuthFailure(response.status));
+    }
+  } catch (error) {
+    showAuthError(`Não consegui falar com o backend. Confirme que ele está rodando em ${API_URL}.`);
+  }
+  submit.disabled = false;
+  $('authSubmitLabel').textContent = AUTH_MODES[state.authMode].submit;
+}
+
+/* ---------------------------------------------------------------- acoes */
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (error) {
+    const helper = document.createElement('textarea');
+    helper.value = text;
+    document.body.append(helper);
+    helper.select();
+    const copied = document.execCommand('copy');
+    helper.remove();
+    return copied;
+  }
+}
+
+async function markCopied(button, text) {
+  if (!(await copyText(text))) return;
+  const label = button.querySelector('span');
+  button.classList.add('is-done');
+  label.textContent = 'Copiado';
+  setTimeout(() => {
+    button.classList.remove('is-done');
+    label.textContent = 'Copiar';
+  }, 1600);
+}
+
+function openConversation(id) {
+  state.activeId = id;
+  save();
+  renderSidebar();
+  renderThread();
+  closeSidebar();
+}
+
+function startNewConversation() {
+  state.activeId = null;
+  save();
+  renderSidebar();
+  renderThread();
+  closeSidebar();
+  input.focus();
+}
+
+/* excluir nao tem volta: o primeiro clique arma, o segundo confirma */
+function requestDelete(button) {
+  if (!button.classList.contains('is-confirming')) {
+    button.classList.add('is-confirming');
+    button.innerHTML = '<i data-lucide="check" class="icon-14"></i>';
+    button.setAttribute('aria-label', 'Confirmar exclusão');
+    paintIcons();
+    setTimeout(() => { if (button.isConnected) renderSidebar(); }, 2500);
+    return;
+  }
+  const id = button.dataset.delete;
+  if (state.pending && state.pending.conversation.id === id) state.pending.controller.abort();
+  state.conversations = state.conversations.filter((c) => c.id !== id);
+  if (state.activeId === id) state.activeId = null;
+  save();
+  renderSidebar();
+  renderThread();
+}
+
+const closeSidebar = () => { $('side').classList.remove('is-open'); $('scrim').classList.remove('is-open'); };
+
+$('openSide').addEventListener('click', () => { $('side').classList.add('is-open'); $('scrim').classList.add('is-open'); });
+$('closeSide').addEventListener('click', closeSidebar);
+$('scrim').addEventListener('click', closeSidebar);
+$('newChat').addEventListener('click', startNewConversation);
+$('logout').addEventListener('click', logout);
+$('authForm').addEventListener('submit', submitAuth);
+$('authSwitch').addEventListener('click', () => {
+  setAuthMode(state.authMode === 'login' ? 'register' : 'login');
+  $('authUsername').focus();
+});
+$('jump').addEventListener('click', () => scrollToEnd(smooth()));
+scroller.addEventListener('scroll', updateJump, { passive: true });
+document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeSidebar(); });
+
+$('conversations').addEventListener('click', (event) => {
+  const remove = event.target.closest('[data-delete]');
+  if (remove) { requestDelete(remove); return; }
+  const open = event.target.closest('[data-open]');
+  if (open) openConversation(open.dataset.open);
+});
+
+hero.addEventListener('click', (event) => {
+  const suggestion = event.target.closest('[data-prompt]');
+  if (suggestion) send(suggestion.dataset.prompt);
+});
+
+thread.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-action]');
+  if (!button) return;
+  if (button.dataset.action === 'retry') retry();
+  if (button.dataset.action === 'copy-message') markCopied(button, button.closest('.message-assistant').dataset.source);
+  if (button.dataset.action === 'copy-code') markCopied(button, button.closest('.code').querySelector('code').textContent);
+});
+
+composer.addEventListener('submit', (event) => {
+  event.preventDefault();
+  if (state.pending) state.pending.controller.abort();
+  else send(input.value);
+});
+
+input.addEventListener('input', () => { resizeInput(); updateComposer(); });
+input.addEventListener('keydown', (event) => {
+  if (event.key !== 'Enter' || event.shiftKey || event.isComposing) return;
+  event.preventDefault();
+  if (!state.pending) composer.requestSubmit();
+});
+
+/* ---------------------------------------------------------------- inicio */
+paintIcons();
+state.auth = readAuth();
+if (state.auth) {
+  enterApp();
+  verifySession();
+} else {
+  showAuth();
+}
+setStatusFromBackend();
+setInterval(() => { if (!document.hidden && !state.pending) setStatusFromBackend(); }, STATUS_INTERVAL);
+
+/* a aura e o loader do proprio sistema; com movimento reduzido fica so o fundo estatico */
+if (!reducedMotion.matches) {
+  const aura = document.createElement('script');
+  aura.src = AURA_SCRIPT;
+  document.body.append(aura);
+}
+</script>
+</body>
+</html>
