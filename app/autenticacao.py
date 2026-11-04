@@ -15,7 +15,7 @@ from banco import Sessao, Usuario, abrir_banco, agora, engine
 DURACAO_DA_SESSAO = timedelta(days=30)
 
 hasher = PasswordHash.recommended()  # Argon2
-HASH_FALSO = hasher.hash("senha-de-ninguem")  # usuario inexistente gasta o mesmo tempo que senha errada
+HASH_FALSO = hasher.hash("senha-de-ninguem")  # an unknown user takes as long as a wrong password
 bearer = HTTPBearer(auto_error=False)
 router = APIRouter()
 
@@ -25,7 +25,7 @@ Credencial = Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]
 
 class Login(BaseModel):
     username: str = Field(max_length=32)
-    password: str = Field(max_length=128)  # o limite evita gastar CPU com hash de textos enormes
+    password: str = Field(max_length=128)  # the limit avoids spending CPU hashing huge inputs
 
 
 class Cadastro(Login):
@@ -49,7 +49,7 @@ def abrir_sessao(banco: Session, usuario: Usuario) -> dict:
 
 
 def usuario_atual(credencial: Credencial) -> Usuario:
-    # conexao propria e curta: nao pode ficar presa durante a chamada ao modelo, que leva segundos
+    # its own short connection: it must not stay held during the model call, which takes seconds
     with Session(engine) as banco:
         sessao = banco.get(Sessao, hash_do_token(credencial.credentials)) if credencial else None
         if not sessao or sessao.expira_em < agora():
@@ -63,7 +63,7 @@ def register(dados: Cadastro, banco: Banco):
     banco.add(usuario)
     try:
         banco.commit()
-    except IntegrityError:  # o indice unico decide, mesmo com dois cadastros ao mesmo tempo
+    except IntegrityError:  # the unique index decides, even with two simultaneous sign-ups
         banco.rollback()
         raise HTTPException(status.HTTP_409_CONFLICT, "Usuario ja existe") from None
     banco.refresh(usuario)
@@ -76,10 +76,10 @@ def login(dados: Login, banco: Banco):
     valida, hash_novo = hasher.verify_and_update(dados.password, usuario.senha_hash if usuario else HASH_FALSO)
     if not usuario or not valida:
         raise nao_autorizado("Usuario ou senha incorretos")
-    if hash_novo:  # atualiza senhas antigas quando os parametros do Argon2 mudam
+    if hash_novo:  # upgrades old hashes when the Argon2 parameters change
         usuario.senha_hash = hash_novo
         banco.add(usuario)
-    banco.exec(delete(Sessao).where(Sessao.expira_em < agora()))  # limpeza sem precisar de tarefa agendada
+    banco.exec(delete(Sessao).where(Sessao.expira_em < agora()))  # cleanup without needing a scheduled task
     return abrir_sessao(banco, usuario)
 
 

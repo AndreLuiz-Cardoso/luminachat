@@ -8,12 +8,12 @@ from dotenv import load_dotenv
 from sqlalchemy import event
 from sqlmodel import Field, Session, SQLModel, create_engine
 
-load_dotenv()  # o main importa este arquivo antes de carregar o .env
+load_dotenv()  # main imports this file before it loads the .env
 
 ARQUIVO_PADRAO = Path(__file__).parent / "lumina.db"
 
-# sem DATABASE_URL o banco e um arquivo SQLite ao lado do codigo; com ela, pode ser PostgreSQL.
-# as hospedagens entregam postgres://, que o SQLAlchemy nao aceita, e o driver instalado e o psycopg
+# without DATABASE_URL the database is a SQLite file next to the code; with it, it can be PostgreSQL.
+# hosts hand out postgres://, which SQLAlchemy rejects, and the driver to install is psycopg
 URL = re.sub(
     r"^postgres(ql)?://",
     "postgresql+psycopg://",
@@ -23,7 +23,7 @@ USA_SQLITE = URL.startswith("sqlite")
 
 engine = create_engine(
     URL,
-    pool_pre_ping=True,  # descarta conexoes que o servidor do banco ja derrubou
+    pool_pre_ping=True,  # discards connections the database server already dropped
     connect_args={"check_same_thread": False} if USA_SQLITE else {},
 )
 
@@ -32,8 +32,8 @@ if USA_SQLITE:
     @event.listens_for(engine, "connect")
     def configurar_sqlite(conexao, _):
         cursor = conexao.cursor()
-        cursor.execute("PRAGMA journal_mode=WAL")  # leituras nao esperam escritas
-        cursor.execute("PRAGMA foreign_keys=ON")  # o SQLite ignora chaves estrangeiras por padrao
+        cursor.execute("PRAGMA journal_mode=WAL")  # reads do not wait for writes
+        cursor.execute("PRAGMA foreign_keys=ON")  # SQLite ignores foreign keys by default
         cursor.close()
 
 
@@ -49,7 +49,7 @@ class Usuario(SQLModel, table=True):
 
 
 class Sessao(SQLModel, table=True):
-    token_hash: str = Field(primary_key=True)  # guarda o hash: quem ler o banco nao entra como o usuario
+    token_hash: str = Field(primary_key=True)  # stores the hash: reading the database does not let anyone sign in as the user
     usuario_id: int = Field(foreign_key="usuario.id", index=True, ondelete="CASCADE")
     expira_em: datetime
 

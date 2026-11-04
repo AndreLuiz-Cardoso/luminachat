@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lumina Chat</title>
-<!-- design system: Instrument Serif, particle button, border-gradient mask, beam-fall e fadeSlideIn -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop stop-color='%23f97316'/%3E%3Cstop offset='1' stop-color='%23f59e0b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='16' fill='url(%23g)'/%3E%3Ccircle cx='16' cy='16' r='5'/%3E%3C/svg%3E">
+<!-- design system: Instrument Serif, particle button, border-gradient mask, beam-fall and fadeSlideIn -->
 <link rel="stylesheet" href="lumina-video-design-system/assets/overview/assets/css2_2b2d87bc82d8.css">
 <link rel="stylesheet" href="lumina-video-design-system/assets/overview/assets/css/components.css">
 <link rel="stylesheet" href="lumina-video-design-system/assets/overview/assets/css/animations.css">
 <style>
-/* ================================================================ tokens do Lumina */
+/* ================================================================ Lumina tokens */
 :root {
   --ground: #050505;
   --screen: #0a0a0a;
@@ -42,7 +43,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { height: 100%; margin: 0; }
-/* so o body tem fundo: um fundo no html esconderia a aura, que fica em z-index negativo */
+/* only the body has a background: one on html would hide the aura, which sits at a negative z-index */
 body {
   overflow: hidden;
   background: var(--ground);
@@ -63,10 +64,10 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse { 50% { opacity: .5; } }
 
-/* entradas: mesmo keyframe do hero; backwards devolve o texto sem filtro ao terminar */
+/* entrances: same keyframe as the hero; backwards leaves the text unfiltered once it ends */
 .enter { animation: fadeSlideIn 1s var(--ease-enter) var(--delay, 0s) backwards; }
 
-/* ================================================================ fundo: aura, paisagem e grade */
+/* ================================================================ background: aura, landscape and grid */
 .aura {
   position: fixed; top: 0; width: 100%; height: 100vh; z-index: -10;
   filter: hue-rotate(90deg) saturate(.5);
@@ -94,7 +95,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 .beam-center { left: 50%; margin-left: -.5px; }
 .beam-guide { position: absolute; top: 0; bottom: 0; left: 50%; border-right: 1px dashed rgba(249, 115, 22, .2); }
 
-/* ================================================================ estrutura */
+/* ================================================================ layout */
 .app {
   position: relative; z-index: 1;
   display: grid; grid-template-columns: 296px minmax(0, 1fr);
@@ -113,7 +114,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 .logo-small { width: 24px; height: 24px; }
 .logo-small .logo-core { width: 8px; height: 8px; }
 
-/* ================================================================ barra lateral */
+/* ================================================================ sidebar */
 .side { min-height: 0; padding: 12px 0 12px 12px; }
 .side-plate {
   display: flex; flex-direction: column; height: 100%;
@@ -139,7 +140,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 .conversations-empty { padding: 4px 0; font-size: .875rem; line-height: 1.6; color: var(--neutral-500); }
 .conversation { position: relative; }
 
-/* item da lista: mesmos estados do .step-item */
+/* list item: same states as .step-item */
 .step {
   position: relative; display: flex; align-items: center; gap: 12px; width: 100%;
   padding: 8px 34px 8px 8px; border-radius: 8px; text-align: left;
@@ -186,10 +187,10 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 }
 .account-name { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: .875rem; font-weight: 500; color: #fff; }
 
-/* ================================================================ anel do CTA e do campo de mensagem */
-/* o original gira um retangulo de 300%: em um elemento largo ele deixaria as pontas descobertas.
-   aqui a camada e sempre quadrada, com lado de 150% da largura, entao cobre o elemento em qualquer angulo.
-   o centro do gradiente sai de 50% de proposito: exato, ele riscava um fio de 1px em larguras impares */
+/* ================================================================ ring of the CTA and the message field */
+/* the original spins a 300% rectangle: on a wide element it would leave the ends uncovered.
+   here the layer is always square, with a side of 150% of the width, so it covers the element at any angle.
+   the gradient center is off 50% on purpose: exactly centered, it drew a 1px line at odd widths */
 .ring { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; }
 .ring-sweep {
   position: absolute; left: -25%; top: 50%; width: 150%; aspect-ratio: 1; margin-top: -75%;
@@ -231,7 +232,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 }
 .cta:hover .cta-chip { transform: translateX(2px); color: #fff; }
 
-/* ================================================================ topo */
+/* ================================================================ header */
 .top { flex: none; display: flex; align-items: center; gap: 12px; min-height: 68px; padding: 0 24px; border-bottom: 1px solid var(--hairline); }
 .icon-button.top-menu { display: none; }
 .top-title { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 1.125rem; font-weight: 600; letter-spacing: -.025em; }
@@ -247,7 +248,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 }
 .icon-button:hover { color: #fff; background: var(--glass); }
 
-/* ================================================================ area de rolagem */
+/* ================================================================ scroll area */
 .scroller {
   position: relative; flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none;
   -webkit-mask-image: linear-gradient(to bottom, transparent, black 20px, black calc(100% - 20px), transparent);
@@ -255,7 +256,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 }
 .scroller > .column { display: flex; flex-direction: column; min-height: 100%; padding-top: 28px; padding-bottom: 28px; }
 
-/* estado vazio: hero intro + lista de casos */
+/* empty state: hero intro + case list */
 .hero { margin: auto 0; }
 .eyebrow { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 28px; }
 .eyebrow i { width: 8px; height: 8px; border-radius: 9999px; background: var(--orange-500); }
@@ -278,7 +279,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 .suggestion:hover .suggestion-label, .suggestion:hover .suggestion-go { color: #fff; }
 .suggestion:hover .suggestion-name svg { opacity: 1; }
 
-/* ================================================================ mensagens */
+/* ================================================================ messages */
 .thread { display: flex; flex-direction: column; gap: 36px; }
 .message-user { display: flex; justify-content: flex-end; }
 .bubble-wrap { position: relative; max-width: min(80%, 560px); }
@@ -311,7 +312,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 .action:hover { color: #fff; background: var(--glass); }
 .action.is-done { color: var(--orange-500); }
 
-/* notice: erros e interrupcoes ficam em vidro, dentro da paleta do sistema */
+/* notice: errors and interruptions use glass, within the system palette */
 .notice {
   position: relative; display: flex; gap: 12px; padding: 14px 16px; border-radius: 12px;
   background: var(--glass); border: 1px solid var(--card-edge);
@@ -323,7 +324,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 .notice code { font: .8125rem var(--font-mono); color: #fff; }
 .notice .action { margin: 8px 0 0 -8px; color: var(--orange-400); }
 
-/* conteudo em markdown */
+/* markdown content */
 .markdown { font-size: .9375rem; line-height: 1.7; color: var(--neutral-300); overflow-wrap: anywhere; }
 .markdown > * + * { margin-top: 14px; }
 .markdown.reveal > * { animation: fadeSlideIn .7s var(--ease-enter) calc(min(var(--order), 8) * 70ms) backwards; }
@@ -358,7 +359,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 .code pre { overflow-x: auto; padding: 14px; scrollbar-width: thin; scrollbar-color: var(--neutral-600) transparent; }
 .code code { font: .8125rem/1.65 var(--font-mono); color: var(--neutral-200); white-space: pre; overflow-wrap: normal; }
 
-/* ================================================================ campo de mensagem */
+/* ================================================================ message field */
 .dock { flex: none; position: relative; padding-bottom: 14px; }
 .jump {
   position: absolute; top: -52px; left: 50%; margin-left: -20px; z-index: 2;
@@ -395,7 +396,7 @@ h1, h2, h3, h4, h5, h6, p, ul, ol, pre, blockquote, figure { margin: 0; padding:
 .dock-hint svg { color: var(--orange-500); }
 kbd { font: inherit; color: var(--neutral-400); }
 
-/* ================================================================ entrar e criar conta */
+/* ================================================================ sign in and create account */
 .auth { position: fixed; inset: 0; z-index: 5; overflow-y: auto; scrollbar-width: none; display: flex; padding: 24px 16px; }
 .auth-wrap { position: relative; width: 100%; max-width: 420px; margin: auto; }
 .auth-glow { position: absolute; inset: -32px; z-index: -1; border-radius: 9999px; background: rgba(249, 115, 22, .2); filter: blur(64px); opacity: .5; pointer-events: none; }
@@ -426,7 +427,7 @@ kbd { font: inherit; color: var(--neutral-400); }
 .auth-switch button { font-weight: 500; color: var(--orange-400); transition: color .3s; }
 .auth-switch button:hover { color: #fff; }
 
-/* ================================================================ telas estreitas */
+/* ================================================================ narrow screens */
 .scrim { display: none; }
 @media (max-width: 900px) {
   .app { grid-template-columns: minmax(0, 1fr); }
@@ -470,7 +471,7 @@ kbd { font: inherit; color: var(--neutral-400); }
 </head>
 <body>
 
-<!-- fundo fixo do Lumina: aura WebGL, paisagem e grade com feixes -->
+<!-- fixed Lumina background: WebGL aura, landscape and beam grid -->
 <div class="aura" aria-hidden="true"><div><div data-us-project="ILgOO23w4wEyPQOKyLO4"></div></div></div>
 <div class="landscape" aria-hidden="true"><img alt="" src="lumina-video-design-system/assets/overview/assets/2b5079f4-4ddd-433b-a936-fc8f7d_7da21e998877.webp"></div>
 <div class="beam-grid" aria-hidden="true">
@@ -497,9 +498,9 @@ kbd { font: inherit; color: var(--neutral-400); }
         Lumina
       </div>
       <h1 id="authTitle"></h1>
-      <label class="field"><span>Usuário</span><input id="authUsername" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="32"></label>
-      <label class="field"><span>Senha</span><input id="authPassword" name="password" type="password" maxlength="128"></label>
-      <p class="auth-hint" id="authHint">Usuário com 3 a 32 letras, números, ponto, hífen ou sublinhado. Senha com pelo menos 8 caracteres.</p>
+      <label class="field"><span>Username</span><input id="authUsername" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="32"></label>
+      <label class="field"><span>Password</span><input id="authPassword" name="password" type="password" maxlength="128"></label>
+      <p class="auth-hint" id="authHint">Username: 3 to 32 letters, numbers, dots, hyphens or underscores. Password: at least 8 characters.</p>
       <p class="auth-error" id="authError" role="alert" hidden></p>
       <button class="button-custom auth-submit" id="authSubmit" type="submit">
         <div class="points_wrapper"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></div>
@@ -514,7 +515,7 @@ kbd { font: inherit; color: var(--neutral-400); }
 </section>
 
 <div class="app" id="app" hidden>
-  <aside class="side" id="side" aria-label="Conversas">
+  <aside class="side" id="side" aria-label="Conversations">
     <div class="side-plate">
       <div class="side-head">
         <div class="brand">
@@ -523,7 +524,7 @@ kbd { font: inherit; color: var(--neutral-400); }
           </span>
           Lumina
         </div>
-        <button class="icon-button top-menu" id="closeSide" type="button" aria-label="Fechar conversas"><i data-lucide="x" class="icon-20"></i></button>
+        <button class="icon-button top-menu" id="closeSide" type="button" aria-label="Close conversations"><i data-lucide="x" class="icon-20"></i></button>
       </div>
       <div class="side-new">
         <button class="cta" id="newChat" type="button">
@@ -533,20 +534,20 @@ kbd { font: inherit; color: var(--neutral-400); }
             <span class="cta-disc">
               <svg viewBox="0 0 24 24" width="14" height="14" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3.845 3.845a2.883 2.883 0 0 0 0 4.077L5.432 9.51c.012-.014.555.503.568.49l4-4c.013-.013-.504-.556-.49-.568L7.922 3.845a2.883 2.883 0 0 0-4.077 0m1.288 11.462a.483.483 0 0 1 .9 0l.157.4a.48.48 0 0 0 .272.273l.398.157a.486.486 0 0 1 0 .903l-.398.158a.48.48 0 0 0-.272.273l-.157.4a.483.483 0 0 1-.9 0l-.157-.4a.48.48 0 0 0-.272-.273l-.398-.158a.486.486 0 0 1 0-.903l.398-.157a.48.48 0 0 0 .272-.274z" fill="#ffffff" opacity=".5"/><path d="M19.967 9.13a.483.483 0 0 1 .9 0l.156.399c.05.125.148.224.273.273l.398.158a.486.486 0 0 1 0 .902l-.398.158a.5.5 0 0 0-.273.273l-.156.4a.483.483 0 0 1-.9 0l-.157-.4a.5.5 0 0 0-.272-.273l-.398-.158a.486.486 0 0 1 0-.902l.398-.158a.5.5 0 0 0 .272-.273z" fill="#ffffff" opacity=".2"/><path d="M16.1 2.307a.483.483 0 0 1 .9 0l.43 1.095a.48.48 0 0 0 .272.274l1.091.432a.486.486 0 0 1 0 .903l-1.09.432a.5.5 0 0 0-.273.273L17 6.81a.483.483 0 0 1-.9 0l-.43-1.095a.5.5 0 0 0-.273-.273l-1.09-.432a.486.486 0 0 1 0-.903l1.09-.432a.5.5 0 0 0 .273-.274z" fill="#ffffff" opacity=".7"/><path d="M10.568 6.49c-.012.014-.555-.503-.568-.49l-4 4c-.013.013.504.556.49.568l9.588 9.587a2.883 2.883 0 1 0 4.078-4.077z" fill="#ffffff"/></svg>
             </span>
-            <span class="cta-label">Nova conversa</span>
+            <span class="cta-label">New chat</span>
             <span class="cta-chip"><i data-lucide="plus" class="icon-12"></i></span>
           </span>
         </button>
       </div>
-      <div class="side-label"><span>Conversas</span><b id="conversationCount"></b></div>
+      <div class="side-label"><span>Conversations</span><b id="conversationCount"></b></div>
       <ul class="conversations" id="conversations"></ul>
       <div class="side-foot">
         <div class="account">
           <span class="account-avatar" id="accountInitial" aria-hidden="true"></span>
           <span class="account-name" id="accountName"></span>
-          <button class="icon-button" id="logout" type="button" aria-label="Sair da conta"><i data-lucide="log-out" class="icon-16"></i></button>
+          <button class="icon-button" id="logout" type="button" aria-label="Sign out"><i data-lucide="log-out" class="icon-16"></i></button>
         </div>
-        As conversas ficam salvas neste navegador.
+        Conversations are saved in this browser.
       </div>
     </div>
   </aside>
@@ -554,57 +555,57 @@ kbd { font: inherit; color: var(--neutral-400); }
 
   <main class="chat">
     <header class="top">
-      <button class="icon-button top-menu" id="openSide" type="button" aria-label="Abrir conversas"><i data-lucide="menu" class="icon-20"></i></button>
-      <h2 class="top-title" id="topTitle">Nova conversa</h2>
-      <div class="live" id="live" role="status"><span class="live-dot"></span><span class="live-text" id="liveText">Verificando...</span></div>
+      <button class="icon-button top-menu" id="openSide" type="button" aria-label="Open conversations"><i data-lucide="menu" class="icon-20"></i></button>
+      <h2 class="top-title" id="topTitle">New chat</h2>
+      <div class="live" id="live" role="status"><span class="live-dot"></span><span class="live-text" id="liveText">Checking...</span></div>
     </header>
 
     <div class="scroller" id="scroller">
       <div class="column">
         <section class="hero" id="hero">
           <div class="eyebrow enter" style="--delay:.1s"><i></i><span>Lumina Chat</span></div>
-          <h1 class="enter" style="--delay:.2s">Sobre o que<br><span>vamos conversar?</span></h1>
-          <p class="hero-lead enter" style="--delay:.3s">Pergunte, peça um rascunho ou cole um trecho de código.</p>
+          <h1 class="enter" style="--delay:.2s">What should we<br><span>talk about?</span></h1>
+          <p class="hero-lead enter" style="--delay:.3s">Ask a question, request a draft or paste some code.</p>
           <div class="suggestions enter" style="--delay:.4s">
-            <button class="suggestion" type="button" data-prompt="Explique como funciona uma API REST, com um exemplo simples.">
-              <span class="suggestion-label">Explicar</span>
-              <span class="suggestion-name"><i data-lucide="lightbulb" class="icon-20"></i>Como funciona uma API REST</span>
+            <button class="suggestion" type="button" data-prompt="Explain how a REST API works, with a simple example.">
+              <span class="suggestion-label">Explain</span>
+              <span class="suggestion-name"><i data-lucide="lightbulb" class="icon-20"></i>How a REST API works</span>
               <svg class="suggestion-go" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.1" r="10"/><path d="M10 16L14 12L10 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
             </button>
-            <button class="suggestion" type="button" data-prompt="Escreva uma função em Python que valide um CPF e explique cada passo.">
-              <span class="suggestion-label">Programar</span>
-              <span class="suggestion-name"><i data-lucide="code" class="icon-20"></i>Função Python que valida CPF</span>
+            <button class="suggestion" type="button" data-prompt="Write a Python function that validates an email address and explain each step.">
+              <span class="suggestion-label">Code</span>
+              <span class="suggestion-name"><i data-lucide="code" class="icon-20"></i>Python email validator</span>
               <svg class="suggestion-go" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.1" r="10"/><path d="M10 16L14 12L10 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
             </button>
-            <button class="suggestion" type="button" data-prompt="Monte um plano de estudos de 4 semanas para aprender FastAPI.">
-              <span class="suggestion-label">Planejar</span>
-              <span class="suggestion-name"><i data-lucide="pen-line" class="icon-20"></i>Plano de 4 semanas de FastAPI</span>
+            <button class="suggestion" type="button" data-prompt="Create a 4-week study plan for learning FastAPI.">
+              <span class="suggestion-label">Plan</span>
+              <span class="suggestion-name"><i data-lucide="pen-line" class="icon-20"></i>4-week FastAPI study plan</span>
               <svg class="suggestion-go" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="12" cy="12" fill="currentColor" fill-opacity="0.1" r="10"/><path d="M10 16L14 12L10 8" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/></svg>
             </button>
           </div>
         </section>
-        <div class="thread" id="thread" role="log" aria-live="polite" aria-label="Mensagens" hidden></div>
+        <div class="thread" id="thread" role="log" aria-live="polite" aria-label="Messages" hidden></div>
       </div>
     </div>
 
     <div class="dock">
-      <button class="jump" id="jump" type="button" aria-label="Ir para a mensagem mais recente"><i data-lucide="arrow-down" class="icon-16"></i></button>
+      <button class="jump" id="jump" type="button" aria-label="Jump to latest message"><i data-lucide="arrow-down" class="icon-16"></i></button>
       <div class="column">
         <form class="composer" id="composer">
           <div class="ring"><div class="ring-sweep"></div></div>
           <div class="plate"></div>
           <div class="composer-row">
-            <textarea id="input" rows="1" placeholder="Envie uma mensagem para a Lumina" aria-label="Mensagem"></textarea>
+            <textarea id="input" rows="1" placeholder="Message Lumina" aria-label="Message"></textarea>
             <button class="button-custom send" id="send" type="submit" disabled>
               <div class="points_wrapper"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></div>
               <span class="inner">
-                <span class="send-label" id="sendLabel">Enviar</span>
+                <span class="send-label" id="sendLabel">Send</span>
                 <svg class="icon" id="sendIcon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
               </span>
             </button>
           </div>
         </form>
-        <div class="dock-hint"><i data-lucide="check" class="icon-14"></i><span><kbd>Enter</kbd> envia · <kbd>Shift + Enter</kbd> quebra a linha</span></div>
+        <div class="dock-hint"><i data-lucide="check" class="icon-14"></i><span><kbd>Enter</kbd> to send · <kbd>Shift + Enter</kbd> for a new line</span></div>
       </div>
     </div>
   </main>
@@ -614,9 +615,9 @@ kbd { font: inherit; color: var(--neutral-400); }
 <script>
 'use strict';
 
-const API_URL = 'http://127.0.0.1:8000';  // endereco do backend FastAPI
-const HISTORY_MESSAGES = 12;              // mensagens anteriores enviadas como contexto; 0 desliga
-const HISTORY_MESSAGE_CHARS = 1500;       // limite de cada mensagem anterior no contexto
+const API_URL = location.origin;          // the backend serves this page, so both share an origin
+const HISTORY_MESSAGES = 12;              // previous messages sent as context; 0 turns it off
+const HISTORY_MESSAGE_CHARS = 1500;       // limit for each previous message in the context
 const STORAGE_KEY = 'lumina.chat.v1';
 const AUTH_KEY = 'lumina.auth.v1';
 const STATUS_INTERVAL = 20000;
@@ -629,7 +630,7 @@ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 const state = { auth: null, authMode: 'login', conversations: [], activeId: null, pending: null };
 
-/* ---------------------------------------------------------------- persistencia */
+/* ---------------------------------------------------------------- persistence */
 const conversationsKey = () => `${STORAGE_KEY}.${state.auth.username}`;
 
 function load() {
@@ -638,7 +639,7 @@ function load() {
   try {
     let raw = localStorage.getItem(conversationsKey());
     if (raw === null) {
-      /* conversas de antes do login passam para a primeira conta que entrar neste navegador */
+      /* conversations from before login move to the first account that signs in on this browser */
       raw = localStorage.getItem(STORAGE_KEY);
       if (raw !== null) {
         localStorage.setItem(conversationsKey(), raw);
@@ -650,13 +651,13 @@ function load() {
       state.conversations = saved.conversations;
       if (state.conversations.some((c) => c.id === saved.activeId)) state.activeId = saved.activeId;
     }
-  } catch (e) { /* sem storage a conversa vale so para esta aba */ }
+  } catch (e) { /* without storage the conversation only lasts in this tab */ }
 }
 
 function save() {
   try {
     localStorage.setItem(conversationsKey(), JSON.stringify({ conversations: state.conversations, activeId: state.activeId }));
-  } catch (e) { /* idem */ }
+  } catch (e) { /* same as above */ }
 }
 
 const activeConversation = () => state.conversations.find((c) => c.id === state.activeId) || null;
@@ -675,7 +676,7 @@ function createConversation(firstMessage) {
 }
 
 /* ---------------------------------------------------------------- markdown */
-/* tudo e escapado antes de virar HTML: nada que vem do modelo chega ao DOM como marcacao */
+/* everything is escaped before becoming HTML: nothing from the model reaches the DOM as markup */
 const escapeHtml = (text) => text.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function renderInline(raw) {
@@ -704,8 +705,8 @@ const isBlockStart = (lines, i) => FENCE.test(lines[i]) || HEADING.test(lines[i]
 const tableCells = (line) => line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((cell) => cell.trim());
 
 function renderCode(language, code) {
-  return `<div class="code"><div class="code-head"><span class="code-lang">${escapeHtml(language || 'código')}</span>`
-    + `<button class="action" type="button" data-action="copy-code"><i data-lucide="copy" class="icon-12"></i><span>Copiar</span></button></div>`
+  return `<div class="code"><div class="code-head"><span class="code-lang">${escapeHtml(language || 'code')}</span>`
+    + `<button class="action" type="button" data-action="copy-code"><i data-lucide="copy" class="icon-12"></i><span>Copy</span></button></div>`
     + `<pre><code>${escapeHtml(code)}</code></pre></div>`;
 }
 
@@ -812,7 +813,7 @@ function renderMarkdown(source) {
   return blocks.join('');
 }
 
-/* ---------------------------------------------------------------- mensagens */
+/* ---------------------------------------------------------------- messages */
 const paintIcons = () => lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
 
 const ASSISTANT_HEAD = `<div class="assistant-head">
@@ -834,7 +835,7 @@ function assistantElement(message, reveal) {
   const element = document.createElement('article');
   element.className = 'message-assistant';
   element.innerHTML = `${ASSISTANT_HEAD}<div class="markdown${reveal ? ' reveal' : ''}">${renderMarkdown(message.text)}</div>
-    <div class="message-actions"><button class="action" type="button" data-action="copy-message"><i data-lucide="copy" class="icon-12"></i><span>Copiar</span></button></div>`;
+    <div class="message-actions"><button class="action" type="button" data-action="copy-message"><i data-lucide="copy" class="icon-12"></i><span>Copy</span></button></div>`;
   [...element.querySelector('.markdown').children].forEach((block, index) => block.style.setProperty('--order', index));
   element.dataset.source = message.text;
   return element;
@@ -845,7 +846,7 @@ function noticeElement(message) {
   element.className = 'message-notice';
   element.innerHTML = `<div class="notice"><i data-lucide="triangle-alert" class="icon-16"></i><div>
     <strong></strong><p></p>
-    <button class="action" type="button" data-action="retry"><i data-lucide="rotate-ccw" class="icon-12"></i><span>Tentar novamente</span></button>
+    <button class="action" type="button" data-action="retry"><i data-lucide="rotate-ccw" class="icon-12"></i><span>Try again</span></button>
   </div></div>`;
   element.querySelector('strong').textContent = message.title;
   element.querySelector('p').textContent = message.detail;
@@ -867,23 +868,23 @@ function pendingElement() {
   const element = document.createElement('article');
   element.className = 'message-assistant enter';
   element.style.animationDuration = '.7s';
-  element.innerHTML = `${ASSISTANT_HEAD}<div class="live is-online"><span class="live-dot"></span><span class="live-text">Analisando...</span></div>`;
+  element.innerHTML = `${ASSISTANT_HEAD}<div class="live is-online"><span class="live-dot"></span><span class="live-text">Analyzing...</span></div>`;
   return element;
 }
 
-/* ---------------------------------------------------------------- rolagem */
+/* ---------------------------------------------------------------- scrolling */
 const smooth = () => (reducedMotion.matches ? 'auto' : 'smooth');
 const nearBottom = () => scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 96;
 const scrollToEnd = (behavior) => scroller.scrollTo({ top: scroller.scrollHeight, behavior });
 const updateJump = () => $('jump').classList.toggle('is-visible', !thread.hidden && !nearBottom());
 
-/* ---------------------------------------------------------------- telas */
+/* ---------------------------------------------------------------- views */
 function renderSidebar() {
   const list = $('conversations');
   const ordered = [...state.conversations].sort((a, b) => b.updated - a.updated);
   $('conversationCount').textContent = ordered.length ? String(ordered.length).padStart(2, '0') : '';
   if (!ordered.length) {
-    list.innerHTML = '<li class="conversations-empty">Sua primeira conversa aparece aqui.</li>';
+    list.innerHTML = '<li class="conversations-empty">Your first conversation will appear here.</li>';
     return;
   }
   list.innerHTML = ordered.map((conversation, index) => `<li class="conversation">
@@ -893,7 +894,7 @@ function renderSidebar() {
       <span class="step-badge">${String(index + 1).padStart(2, '0')}</span>
       <span class="step-text">${escapeHtml(conversation.title)}</span>
     </button>
-    <button class="step-delete" type="button" data-delete="${conversation.id}" aria-label="Excluir conversa: ${escapeHtml(conversation.title)}"><i data-lucide="trash-2" class="icon-14"></i></button>
+    <button class="step-delete" type="button" data-delete="${conversation.id}" aria-label="Delete conversation: ${escapeHtml(conversation.title)}"><i data-lucide="trash-2" class="icon-14"></i></button>
   </li>`).join('');
   paintIcons();
 }
@@ -903,7 +904,7 @@ function renderThread() {
   thread.replaceChildren();
   hero.hidden = !!conversation;
   thread.hidden = !conversation;
-  $('topTitle').textContent = conversation ? conversation.title : 'Nova conversa';
+  $('topTitle').textContent = conversation ? conversation.title : 'New chat';
   document.title = conversation ? `${conversation.title} · Lumina` : 'Lumina Chat';
   if (conversation) {
     conversation.messages.forEach((message) => thread.append(messageElement(message, false)));
@@ -932,8 +933,8 @@ function updateComposer() {
   const busy = !!state.pending;
   composer.classList.toggle('is-busy', busy);
   sendButton.disabled = !busy && !input.value.trim();
-  $('sendLabel').textContent = busy ? 'Parar' : 'Enviar';
-  sendButton.setAttribute('aria-label', busy ? 'Parar resposta' : 'Enviar mensagem');
+  $('sendLabel').textContent = busy ? 'Stop' : 'Send';
+  sendButton.setAttribute('aria-label', busy ? 'Stop response' : 'Send message');
   $('sendIcon').innerHTML = busy
     ? '<rect x="6" y="6" width="12" height="12" rx="2" fill="#fff"/>'
     : '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>';
@@ -945,7 +946,7 @@ function resizeInput() {
 }
 
 /* ---------------------------------------------------------------- backend */
-/* o endpoint recebe uma unica mensagem e nao guarda historico, entao o contexto vai dentro dela */
+/* the endpoint takes a single message and keeps no history, so the context goes inside it */
 function buildPrompt(conversation) {
   const turns = conversation.messages.filter((m) => m.role === 'user' || m.role === 'assistant');
   const current = turns[turns.length - 1].text;
@@ -953,28 +954,28 @@ function buildPrompt(conversation) {
   if (!previous.length) return current;
   const transcript = previous.map((m) => {
     const text = m.text.length > HISTORY_MESSAGE_CHARS ? m.text.slice(0, HISTORY_MESSAGE_CHARS) + '…' : m.text;
-    return `${m.role === 'user' ? 'Usuário' : 'Assistente'}: ${text}`;
+    return `${m.role === 'user' ? 'User' : 'Assistant'}: ${text}`;
   }).join('\n\n');
-  return `Histórico recente da conversa, use apenas como contexto:\n\n${transcript}\n\nResponda agora à mensagem atual do usuário:\n${current}`;
+  return `Recent conversation history, use it only as context:\n\n${transcript}\n\nNow reply to the user's current message:\n${current}`;
 }
 
 function describeFailure(error) {
   if (error.name === 'AbortError') {
-    return { title: 'Resposta interrompida', detail: 'Você parou esta resposta antes de ela chegar.' };
+    return { title: 'Response stopped', detail: 'You stopped this response before it arrived.' };
   }
   if (error.status === 401) {
-    return { title: 'Sua sessão expirou', detail: 'Depois de entrar de novo, use o botão abaixo para reenviar a mensagem.' };
+    return { title: 'Your session expired', detail: 'After signing in again, use the button below to resend your message.' };
   }
   if (error.status === 422) {
-    return { title: 'O backend recusou a mensagem', detail: 'O formato enviado não é o que o endpoint /send_message espera (erro 422).' };
+    return { title: 'The backend rejected the message', detail: 'The format sent is not what the /send_message endpoint expects (error 422).' };
   }
   if (error.status) {
-    return { title: `O backend respondeu com erro ${error.status}`, detail: 'A chamada ao modelo falhou. Veja o terminal do backend: pode ser a chave do OpenRouter ou o limite do modelo gratuito.' };
+    return { title: `The backend returned error ${error.status}`, detail: 'The model call failed. Check the backend terminal: it may be the OpenRouter key or the free model limit.' };
   }
   if (error.empty) {
-    return { title: 'O modelo devolveu uma resposta vazia', detail: 'Isso acontece às vezes com o roteador de modelos gratuitos. Tente novamente.' };
+    return { title: 'The model returned an empty response', detail: 'This sometimes happens with the free model router. Try again.' };
   }
-  return { title: 'Não consegui falar com o backend', detail: `Confirme que ele está rodando em ${API_URL} e que o CORS permite esta página.` };
+  return { title: "Couldn't reach the backend", detail: `Make sure it's running at ${API_URL}.` };
 }
 
 async function requestReply(conversation) {
@@ -984,7 +985,7 @@ async function requestReply(conversation) {
   const startedAt = Date.now();
   const label = element.querySelector('.live-text');
   const timer = setInterval(() => {
-    label.textContent = `Analisando... ${Math.round((Date.now() - startedAt) / 1000)}s`;
+    label.textContent = `Analyzing... ${Math.round((Date.now() - startedAt) / 1000)}s`;
   }, 1000);
   state.pending = { conversation, controller, element };
   updateComposer();
@@ -1014,18 +1015,18 @@ async function requestReply(conversation) {
 
   clearInterval(timer);
   element.remove();
-  if (state.auth !== owner) return;  // saiu da conta durante a espera
+  if (state.auth !== owner) return;  // signed out during the wait
   state.pending = null;
   updateComposer();
 
   const followReply = nearBottom();
   const added = appendMessage(conversation, reply ? { role: 'assistant', text: reply } : { role: 'error', ...failure });
   if (added && followReply) {
-    /* resposta longa: leva ao inicio dela, nao ao fim */
+    /* long reply: go to its start, not its end */
     scroller.scrollTo({ top: Math.max(added.offsetTop - 16, 0), behavior: smooth() });
   }
   updateJump();
-  if (sessionExpired) endSession('Sua sessão expirou. Entre novamente.');
+  if (sessionExpired) endSession('Your session expired. Sign in again.');
 }
 
 function send(text) {
@@ -1066,15 +1067,15 @@ function setStatus(online) {
   const live = $('live');
   live.classList.toggle('is-online', online);
   live.classList.toggle('is-offline', !online);
-  $('liveText').textContent = online ? 'Conectado' : 'Backend offline';
+  $('liveText').textContent = online ? 'Connected' : 'Backend offline';
 }
 
-/* ---------------------------------------------------------------- conta */
+/* ---------------------------------------------------------------- account */
 const authHeaders = () => ({ Authorization: `Bearer ${state.auth.token}` });
 
 const AUTH_MODES = {
-  login: { title: 'Entre na<br><span>sua conta</span>', submit: 'Entrar', question: 'Ainda não tem conta?', link: 'Criar conta', password: 'current-password' },
-  register: { title: 'Crie sua<br><span>conta</span>', submit: 'Criar conta', question: 'Já tem conta?', link: 'Entrar', password: 'new-password' },
+  login: { title: 'Sign in to<br><span>your account</span>', submit: 'Sign in', question: 'No account yet?', link: 'Create account', password: 'current-password' },
+  register: { title: 'Create your<br><span>account</span>', submit: 'Create account', question: 'Already have an account?', link: 'Sign in', password: 'new-password' },
 };
 
 function readAuth() {
@@ -1090,7 +1091,7 @@ function writeAuth() {
   try {
     if (state.auth) localStorage.setItem(AUTH_KEY, JSON.stringify(state.auth));
     else localStorage.removeItem(AUTH_KEY);
-  } catch (e) { /* sem storage o login vale so para esta aba */ }
+  } catch (e) { /* without storage the login only lasts in this tab */ }
 }
 
 function showAuthError(message) {
@@ -1147,30 +1148,30 @@ function endSession(message) {
 function logout() {
   const headers = authHeaders();
   endSession();
-  fetch(`${API_URL}/logout`, { method: 'POST', headers }).catch(() => { /* a sessao expira sozinha */ });
+  fetch(`${API_URL}/logout`, { method: 'POST', headers }).catch(() => { /* the session expires on its own */ });
 }
 
-/* sem resposta do backend a pessoa continua lendo as conversas; so um 401 encerra a sessao */
+/* with no backend reply the conversations stay readable; only a 401 ends the session */
 async function verifySession() {
   const owner = state.auth;
   try {
     const response = await fetch(`${API_URL}/me`, { headers: authHeaders() });
-    if (response.status === 401 && state.auth === owner) endSession('Sua sessão expirou. Entre novamente.');
+    if (response.status === 401 && state.auth === owner) endSession('Your session expired. Sign in again.');
   } catch (error) { /* offline */ }
 }
 
 function validateCredentials(username, password) {
-  if (state.authMode === 'login') return username && password ? '' : 'Preencha usuário e senha.';
-  if (!/^[A-Za-z0-9._-]{3,32}$/.test(username)) return 'O usuário precisa ter de 3 a 32 letras, números, ponto, hífen ou sublinhado.';
-  if (password.length < 8) return 'A senha precisa ter pelo menos 8 caracteres.';
+  if (state.authMode === 'login') return username && password ? '' : 'Enter your username and password.';
+  if (!/^[A-Za-z0-9._-]{3,32}$/.test(username)) return 'Your username must be 3 to 32 letters, numbers, dots, hyphens or underscores.';
+  if (password.length < 8) return 'Your password must be at least 8 characters.';
   return '';
 }
 
 function describeAuthFailure(status) {
-  if (status === 401) return 'Usuário ou senha incorretos.';
-  if (status === 409) return 'Esse usuário já existe. Escolha outro nome ou entre na conta.';
-  if (status === 422) return 'Confira o usuário e a senha informados.';
-  return `O backend respondeu com erro ${status}. Veja o terminal dele.`;
+  if (status === 401) return 'Incorrect username or password.';
+  if (status === 409) return 'That username is taken. Choose another one or sign in.';
+  if (status === 422) return 'Check your username and password.';
+  return `The backend returned error ${status}. Check its terminal.`;
 }
 
 async function submitAuth(event) {
@@ -1183,7 +1184,7 @@ async function submitAuth(event) {
 
   const submit = $('authSubmit');
   submit.disabled = true;
-  $('authSubmitLabel').textContent = 'Aguarde...';
+  $('authSubmitLabel').textContent = 'Please wait...';
   try {
     const response = await fetch(`${API_URL}/${state.authMode}`, {
       method: 'POST',
@@ -1200,13 +1201,13 @@ async function submitAuth(event) {
       showAuthError(describeAuthFailure(response.status));
     }
   } catch (error) {
-    showAuthError(`Não consegui falar com o backend. Confirme que ele está rodando em ${API_URL}.`);
+    showAuthError(`Couldn't reach the backend. Make sure it's running at ${API_URL}.`);
   }
   submit.disabled = false;
   $('authSubmitLabel').textContent = AUTH_MODES[state.authMode].submit;
 }
 
-/* ---------------------------------------------------------------- acoes */
+/* ---------------------------------------------------------------- actions */
 async function copyText(text) {
   try {
     await navigator.clipboard.writeText(text);
@@ -1226,10 +1227,10 @@ async function markCopied(button, text) {
   if (!(await copyText(text))) return;
   const label = button.querySelector('span');
   button.classList.add('is-done');
-  label.textContent = 'Copiado';
+  label.textContent = 'Copied';
   setTimeout(() => {
     button.classList.remove('is-done');
-    label.textContent = 'Copiar';
+    label.textContent = 'Copy';
   }, 1600);
 }
 
@@ -1250,12 +1251,12 @@ function startNewConversation() {
   input.focus();
 }
 
-/* excluir nao tem volta: o primeiro clique arma, o segundo confirma */
+/* deleting cannot be undone: the first click arms it, the second confirms */
 function requestDelete(button) {
   if (!button.classList.contains('is-confirming')) {
     button.classList.add('is-confirming');
     button.innerHTML = '<i data-lucide="check" class="icon-14"></i>';
-    button.setAttribute('aria-label', 'Confirmar exclusão');
+    button.setAttribute('aria-label', 'Confirm delete');
     paintIcons();
     setTimeout(() => { if (button.isConnected) renderSidebar(); }, 2500);
     return;
@@ -1318,7 +1319,7 @@ input.addEventListener('keydown', (event) => {
   if (!state.pending) composer.requestSubmit();
 });
 
-/* ---------------------------------------------------------------- inicio */
+/* ---------------------------------------------------------------- startup */
 paintIcons();
 state.auth = readAuth();
 if (state.auth) {
@@ -1330,7 +1331,7 @@ if (state.auth) {
 setStatusFromBackend();
 setInterval(() => { if (!document.hidden && !state.pending) setStatusFromBackend(); }, STATUS_INTERVAL);
 
-/* a aura e o loader do proprio sistema; com movimento reduzido fica so o fundo estatico */
+/* the aura is the system's own loader; with reduced motion only the static background stays */
 if (!reducedMotion.matches) {
   const aura = document.createElement('script');
   aura.src = AURA_SCRIPT;
