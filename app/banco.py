@@ -13,7 +13,7 @@ load_dotenv()  # main imports this file before it loads the .env
 ARQUIVO_PADRAO = Path(__file__).parent / "lumina.db"
 
 # without DATABASE_URL the database is a SQLite file next to the code; with it, it can be PostgreSQL.
-# hosts hand out postgres://, which SQLAlchemy rejects, and the driver to install is psycopg
+# hosts hand out postgres://, which SQLAlchemy rejects, and the installed driver is psycopg
 URL = re.sub(
     r"^postgres(ql)?://",
     "postgresql+psycopg://",

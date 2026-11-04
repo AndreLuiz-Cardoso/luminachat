@@ -49,7 +49,7 @@ The project was built to practice the whole path of a web product, from interfac
 | Layer | Technology | Why it was chosen |
 | --- | --- | --- |
 | Backend | Python 3.14, FastAPI | Typed request validation and automatic API docs |
-| Database | SQLite through SQLModel | One file and no server to maintain |
+| Database | SQLite or PostgreSQL through SQLModel | One file in development, a managed server in production |
 | Passwords | Argon2id through pwdlib | Memory-hard hashing, resistant to GPU attacks |
 | AI | OpenRouter, using the OpenAI SDK | Access to many models through one API |
 | Frontend | HTML, CSS and JavaScript | No framework and no build step |
@@ -145,7 +145,7 @@ Protected routes expect the header `Authorization: Bearer <token>`. With the app
 | Variable | Required | Description |
 | --- | --- | --- |
 | `OPENROUTER_KEY` | Yes | API key used to call the model |
-| `DATABASE_URL` | No | Database connection. Defaults to the SQLite file `app/lumina.db` |
+| `DATABASE_URL` | No | Database connection, such as a PostgreSQL URL. Defaults to the SQLite file `app/lumina.db` |
 
 ## Project structure
 
@@ -173,8 +173,7 @@ This project is under active development. These are the known gaps and the next 
 - [ ] Conversations stored on the server, which currently stay in the browser of each device
 - [ ] Password recovery
 - [ ] Database migrations with Alembic
-- [ ] Validation against a live PostgreSQL server
-- [ ] Production deployment with Docker
+- [ ] Production deployment
 
 ## Author
 
